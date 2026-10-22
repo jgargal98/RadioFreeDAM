@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<?xaml-comp compile="true" ?>
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:f="clr-namespace:Fonts"
+    xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+
+    <toolkit:InvertedBoolConverter x:Key="InvertedBoolConverter" />
+
+    <x:Double x:Key="size40">4</x:Double>
+    <x:Double x:Key="size80">8</x:Double>
+    <x:Double x:Key="size120">12</x:Double>
+    <x:Double x:Key="size160">16</x:Double>
+    <x:Double x:Key="size240">24</x:Double>
+    <x:Double x:Key="size320">32</x:Double>
+
+    <OnIdiom x:Key="IconSize"
+             x:TypeArguments="x:Double"
+             Default="24">
+        <OnIdiom.Desktop>28</OnIdiom.Desktop>
+    </OnIdiom>
+
+    <OnIdiom x:Key="LayoutPadding"
+             x:TypeArguments="Thickness"
+             Default="16">
+        <OnIdiom.Desktop>30</OnIdiom.Desktop>
+    </OnIdiom>
+
+    <OnIdiom x:Key="LayoutSpacing"
+             x:TypeArguments="x:Double"
+             Default="12">
+        <OnIdiom.Desktop>16</OnIdiom.Desktop>
+    </OnIdiom>
+
+    <!-- Iconos (fuente Fluent UI incluida en Resources/Fonts) -->
+
+    <FontImageSource x:Key="IconHome"
+                     Glyph="{x:Static f:FluentUI.home_24_regular}"
+                     FontFamily="{x:Static f:FluentUI.FontFamily}"
+                     Color="{AppThemeBinding Light={StaticResource DarkOnLightBackground}, Dark={StaticResource LightOnDarkBackground}}"
+                     Size="{StaticResource IconSize}" />
+
+    <FontImageSource x:Key="IconPlayer"
+                     Glyph="{x:Static f:FluentUI.speaker_2_24_regular}"
+                     FontFamily="{x:Static f:FluentUI.FontFamily}"
+                     Color="{AppThemeBinding Light={StaticResource DarkOnLightBackground}, Dark={StaticResource LightOnDarkBackground}}"
+                     Size="{StaticResource IconSize}" />
+
+    <FontImageSource x:Key="IconFavorites"
+                     Glyph="{x:Static f:FluentUI.heart_24_regular}"
+                     FontFamily="{x:Static f:FluentUI.FontFamily}"
+                     Color="{AppThemeBinding Light={StaticResource DarkOnLightBackground}, Dark={StaticResource LightOnDarkBackground}}"
+                     Size="{StaticResource IconSize}" />
+
+    <!-- Estilos de texto -->
+
+    <Style TargetType="Label">
+        <Setter Property="TextColor"
+                Value="{AppThemeBinding Light={StaticResource DarkOnLightBackground}, Dark={StaticResource LightOnDarkBackground}}" />
+        <Setter Property="BackgroundColor"
+                Value="Transparent" />
+        <Setter Property="FontSize"
+                Value="16" />
+    </Style>
+
+    <Style x:Key="Title1"
+           TargetType="Label">
+        <Setter Property="FontSize"
+                Value="28" />
+        <Setter Property="FontAttributes"
+                Value="Bold" />
+    </Style>
+
+    <Style x:Key="Title2"
+           TargetType="Label">
+        <Setter Property="FontSize"
+                Value="22" />
+        <Setter Property="FontAttributes"
+                Value="Bold" />
+    </Style>
+
+    <Style x:Key="Body1Strong"
+           TargetType="Label">
+        <Setter Property="FontSize"
+                Value="17" />
+        <Setter Property="FontAttributes"
+                Value="Bold" />
+    </Style>
+
+    <Style x:Key="Muted"
+           TargetType="Label">
+        <Setter Property="FontSize"
+                Value="14" />
+        <Setter Property="TextColor"
+                Value="{AppThemeBinding Light={StaticResource MutedTextLight}, Dark={StaticResource MutedTextDark}}" />
+    </Style>
+
+    <Style x:Key="ErrorText"
+           TargetType="Label">
+        <Setter Property="FontSize"
+                Value="14" />
+        <Setter Property="TextColor"
+                Value="{AppThemeBinding Light={StaticResource Error}, Dark={StaticResource ErrorDark}}" />
+    </Style>
+
+    <!-- Superficies -->
+
+    <Style x:Key="CardStyle"
+           TargetType="Border">
+        <Setter Property="StrokeShape" Value="RoundRectangle 14" />
+        <Setter Property="StrokeThickness" Value="0" />
+        <Setter Property="Padding" Value="14" />
+        <Setter Property="Background"
+                Value="{AppThemeBinding Light={StaticResource LightSecondaryBackground}, Dark={StaticResource DarkSecondaryBackground}}" />
+    </Style>
+
+    <!-- Tarjeta de la emisora seleccionada: fondo verde suave y borde verde -->
+    <Style x:Key="SelectedCardStyle"
+           TargetType="Border"
+           BasedOn="{StaticResource CardStyle}">
+        <Setter Property="StrokeThickness" Value="2" />
+        <Setter Property="Stroke" Value="{StaticResource Primary}" />
+        <Setter Property="Background"
+                Value="{AppThemeBinding Light={StaticResource PrimarySoftLight}, Dark={StaticResource PrimarySoftDark}}" />
+    </Style>
+
+    <!-- Avatar cuadrado con la inicial de la emisora -->
+    <Style x:Key="StationAvatarStyle"
+           TargetType="Border">
+        <Setter Property="StrokeShape" Value="RoundRectangle 10" />
+        <Setter Property="StrokeThickness" Value="0" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="Background" Value="{StaticResource Primary}" />
+    </Style>
+
+    <!-- Pastilla de estado (servidor conectado / sin conexión) -->
+    <Style x:Key="ChipStyle"
+           TargetType="Border">
+        <Setter Property="StrokeShape" Value="RoundRectangle 12" />
+        <Setter Property="StrokeThickness" Value="0" />
+        <Setter Property="Padding" Value="10,4" />
+        <Setter Property="HorizontalOptions" Value="Start" />
+        <Setter Property="Background"
+                Value="{AppThemeBinding Light={StaticResource LightSecondaryBackground}, Dark={StaticResource DarkSecondaryBackground}}" />
+    </Style>
+
+    <!-- Botón secundario (contorno) -->
+    <Style x:Key="OutlineButton"
+           TargetType="Button">
+        <Setter Property="BackgroundColor" Value="Transparent" />
+        <Setter Property="BorderColor" Value="{StaticResource Primary}" />
+        <Setter Property="BorderWidth" Value="1.5" />
+        <Setter Property="TextColor"
+                Value="{AppThemeBinding Light={StaticResource PrimaryTextLight}, Dark={StaticResource PrimaryTextDark}}" />
+        <Setter Property="FontSize" Value="15" />
+    </Style>
+
+</ResourceDictionary>
