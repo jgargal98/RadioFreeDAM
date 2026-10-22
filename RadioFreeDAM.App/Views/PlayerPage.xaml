@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:f="clr-namespace:Fonts"
+             xmlns:vm="clr-namespace:RadioFreeDAM.ViewModels"
+             x:Class="RadioFreeDAM.Views.PlayerPage"
+             x:DataType="vm:PlayerViewModel"
+             Title="Reproductor">
+
+    <Grid Padding="{StaticResource LayoutPadding}">
+
+        <!-- Sin emisora seleccionada -->
+        <VerticalStackLayout IsVisible="{Binding HasStation, Converter={StaticResource InvertedBoolConverter}}"
+                             VerticalOptions="Center" HorizontalOptions="Center"
+                             Spacing="16" MaximumWidthRequest="360">
+            <Label Text="Ninguna emisora seleccionada" Style="{StaticResource Title2}" HorizontalTextAlignment="Center" />
+            <Label Text="Elige una emisora en Inicio para escucharla aquí."
+                   Style="{StaticResource Muted}" HorizontalTextAlignment="Center" />
+            <Button Text="Ir a Inicio" Command="{Binding GoToHomeCommand}" HorizontalOptions="Center" />
+        </VerticalStackLayout>
+
+        <!-- Emisora seleccionada -->
+        <VerticalStackLayout IsVisible="{Binding HasStation}"
+                             VerticalOptions="Center" HorizontalOptions="Center"
+                             Spacing="20" MaximumWidthRequest="420">
+
+            <Border Style="{StaticResource StationAvatarStyle}"
+                    StrokeShape="RoundRectangle 28"
+                    WidthRequest="180" HeightRequest="180"
+                    HorizontalOptions="Center">
+                <Label Text="{Binding StationInitial}"
+                       TextColor="{StaticResource OnPrimary}"
+                       FontSize="84" FontAttributes="Bold"
+                       HorizontalOptions="Center" VerticalOptions="Center" />
+            </Border>
+
+            <VerticalStackLayout Spacing="4">
+                <Label Text="{Binding CurrentStation.Name}" Style="{StaticResource Title1}" HorizontalTextAlignment="Center" />
+                <Label Text="{Binding StationSubtitle}" Style="{StaticResource Muted}" HorizontalTextAlignment="Center" />
+            </VerticalStackLayout>
+
+            <Label Text="{Binding StatusText}" Style="{StaticResource Body1Strong}" HorizontalTextAlignment="Center">
+                <Label.Triggers>
+                    <DataTrigger TargetType="Label" Binding="{Binding IsPlaying}" Value="True">
+                        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource PrimaryTextLight}, Dark={StaticResource PrimaryTextDark}}" />
+                    </DataTrigger>
+                </Label.Triggers>
+            </Label>
+
+            <!-- Botón principal: el icono cambia entre reproducir y detener -->
+            <ImageButton Command="{Binding TogglePlaybackCommand}"
+                         WidthRequest="88" HeightRequest="88"
+                         CornerRadius="44" Padding="22"
+                         BackgroundColor="{StaticResource Primary}"
+                         HorizontalOptions="Center"
+                         SemanticProperties.Description="{Binding ToggleButtonText}">
+                <ImageButton.Source>
+                    <FontImageSource Glyph="{x:Static f:FluentUI.play_24_regular}"
+                                     FontFamily="{x:Static f:FluentUI.FontFamily}"
+                                     Color="{StaticResource OnPrimary}" Size="44" />
+                </ImageButton.Source>
+                <ImageButton.Triggers>
+                    <DataTrigger TargetType="ImageButton" Binding="{Binding IsPlaying}" Value="True">
+                        <Setter Property="Source">
+                            <FontImageSource Glyph="{x:Static f:FluentUI.stop_24_regular}"
+                                             FontFamily="{x:Static f:FluentUI.FontFamily}"
+                                             Color="{StaticResource OnPrimary}" Size="44" />
+                        </Setter>
+                    </DataTrigger>
+                </ImageButton.Triggers>
+            </ImageButton>
+
+            <Label Text="Reproductor simulado (Fase 1): todavía no suena audio."
+                   Style="{StaticResource Muted}" FontSize="12" HorizontalTextAlignment="Center" />
+        </VerticalStackLayout>
+    </Grid>
+</ContentPage>

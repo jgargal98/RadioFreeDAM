@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Shell
+    x:Class="RadioFreeDAM.AppShell"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:views="clr-namespace:RadioFreeDAM.Views"
+    Shell.FlyoutBehavior="Disabled"
+    Title="RadioFreeDAM">
+
+    <!-- Navegación por pestañas inferiores: tres secciones siempre a un toque. -->
+    <TabBar>
+        <ShellContent
+            Title="Inicio"
+            Icon="{StaticResource IconHome}"
+            ContentTemplate="{DataTemplate views:HomePage}"
+            Route="home"
+            SemanticProperties.Description="Inicio"
+            SemanticProperties.Hint="Ver el listado de emisoras" />
+
+        <ShellContent
+            Title="Reproductor"
+            Icon="{StaticResource IconPlayer}"
+            ContentTemplate="{DataTemplate views:PlayerPage}"
+            Route="player"
+            SemanticProperties.Description="Reproductor"
+            SemanticProperties.Hint="Ver la emisora seleccionada" />
+
+        <ShellContent
+            Title="Favoritos"
+            Icon="{StaticResource IconFavorites}"
+            ContentTemplate="{DataTemplate views:FavoritesPage}"
+            Route="favorites"
+            SemanticProperties.Description="Favoritos"
+            SemanticProperties.Hint="Ver tus emisoras favoritas" />
+    </TabBar>
+
+</Shell>
