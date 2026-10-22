@@ -1,0 +1,71 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+
+    <!-- Note: For Android please see also Platforms\Android\Resources\values\colors.xml -->
+
+    <!-- Acento de RadioFreeDAM: verde. Se usa como relleno (botones, emisora activa) en ambos temas. -->
+    <Color x:Key="Primary">#1DB954</Color>
+    <!-- Texto sobre el verde: negro para que se lea bien. -->
+    <Color x:Key="OnPrimary">#0B0B0B</Color>
+    <!-- Verde para usar como TEXTO: más oscuro en claro y más brillante en oscuro, para mantener el contraste. -->
+    <Color x:Key="PrimaryTextLight">#127A39</Color>
+    <Color x:Key="PrimaryTextDark">#1ED760</Color>
+    <!-- Fondo suave del acento (chips, fila seleccionada). -->
+    <Color x:Key="PrimarySoftLight">#DDF5E5</Color>
+    <Color x:Key="PrimarySoftDark">#163A24</Color>
+
+    <Color x:Key="Error">#D93025</Color>
+    <Color x:Key="ErrorDark">#FF6B60</Color>
+
+    <!-- Claves que usa Styles.xaml de la plantilla -->
+    <Color x:Key="PrimaryDark">#1ED760</Color>
+    <Color x:Key="PrimaryDarkText">#0B0B0B</Color>
+    <Color x:Key="Secondary">#DDF5E5</Color>
+    <Color x:Key="SecondaryDarkText">#EDEDED</Color>
+    <Color x:Key="Tertiary">#127A39</Color>
+
+    <Color x:Key="DarkBackground">#121212</Color>
+    <Color x:Key="LightOnDarkBackground">#EDEDED</Color>
+    <Color x:Key="LightBackground">#F5F5F7</Color>
+    <Color x:Key="DarkOnLightBackground">#0D0D0D</Color>
+
+    <!-- Tarjetas y superficies elevadas -->
+    <Color x:Key="LightSecondaryBackground">#FFFFFF</Color>
+    <Color x:Key="DarkSecondaryBackground">#1E1E1E</Color>
+
+    <!-- Texto secundario (país, etiquetas, descripciones) -->
+    <Color x:Key="MutedTextLight">#5F6368</Color>
+    <Color x:Key="MutedTextDark">#A0A0A0</Color>
+
+    <Color x:Key="White">White</Color>
+    <Color x:Key="Black">Black</Color>
+    <Color x:Key="Magenta">#1DB954</Color>
+    <Color x:Key="MidnightBlue">#0D0D0D</Color>
+    <Color x:Key="OffBlack">#1f1f1f</Color>
+
+    <Color x:Key="Gray100">#E1E1E1</Color>
+    <Color x:Key="Gray200">#C8C8C8</Color>
+    <Color x:Key="Gray300">#ACACAC</Color>
+    <Color x:Key="Gray400">#919191</Color>
+    <Color x:Key="Gray500">#6E6E6E</Color>
+    <Color x:Key="Gray600">#404040</Color>
+    <Color x:Key="Gray900">#212121</Color>
+    <Color x:Key="Gray950">#141414</Color>
+
+    <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource Primary}"/>
+    <SolidColorBrush x:Key="SecondaryBrush" Color="{StaticResource Secondary}"/>
+    <SolidColorBrush x:Key="TertiaryBrush" Color="{StaticResource Tertiary}"/>
+    <SolidColorBrush x:Key="WhiteBrush" Color="{StaticResource White}"/>
+    <SolidColorBrush x:Key="BlackBrush" Color="{StaticResource Black}"/>
+
+    <SolidColorBrush x:Key="Gray100Brush" Color="{StaticResource Gray100}"/>
+    <SolidColorBrush x:Key="Gray200Brush" Color="{StaticResource Gray200}"/>
+    <SolidColorBrush x:Key="Gray300Brush" Color="{StaticResource Gray300}"/>
+    <SolidColorBrush x:Key="Gray400Brush" Color="{StaticResource Gray400}"/>
+    <SolidColorBrush x:Key="Gray500Brush" Color="{StaticResource Gray500}"/>
+    <SolidColorBrush x:Key="Gray600Brush" Color="{StaticResource Gray600}"/>
+    <SolidColorBrush x:Key="Gray900Brush" Color="{StaticResource Gray900}"/>
+    <SolidColorBrush x:Key="Gray950Brush" Color="{StaticResource Gray950}"/>
+</ResourceDictionary>

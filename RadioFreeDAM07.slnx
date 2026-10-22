@@ -1,3 +1,5 @@
 <Solution>
-  <Project Path="RadioFreeDAM07.csproj" />
+  <Project Path="RadioFreeDAM.Api/RadioFreeDAM.Api.csproj" />
+  <Project Path="RadioFreeDAM.App/RadioFreeDAM.App.csproj" />
+  <Project Path="RadioFreeDAM.Shared/RadioFreeDAM.Shared.csproj" />
 </Solution>
