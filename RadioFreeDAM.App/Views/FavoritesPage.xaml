@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:dto="clr-namespace:RadioFreeDAM.Shared.Dtos;assembly=RadioFreeDAM.Shared"
+             xmlns:vm="clr-namespace:RadioFreeDAM.ViewModels"
+             x:Class="RadioFreeDAM.Views.FavoritesPage"
+             x:DataType="vm:FavoritesViewModel"
+             Title="Favoritos">
+
+    <Grid RowDefinitions="Auto,*"
+          Padding="{StaticResource LayoutPadding}"
+          RowSpacing="{StaticResource LayoutSpacing}">
+
+        <Label Text="Favoritos" Style="{StaticResource Title1}" />
+
+        <!-- Preparado para la Fase 3: la lista se rellenará desde la API tras iniciar sesión -->
+        <CollectionView Grid.Row="1" ItemsSource="{Binding Favorites}" SelectionMode="None">
+            <CollectionView.EmptyView>
+                <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center"
+                                     Spacing="12" MaximumWidthRequest="360">
+                    <Image Source="{StaticResource IconFavorites}" WidthRequest="48" HeightRequest="48" />
+                    <Label Text="Aún no tienes favoritas" Style="{StaticResource Title2}" HorizontalTextAlignment="Center" />
+                    <Label Text="Cuando inicies sesión podrás guardar tus emisoras favoritas y recuperarlas en cualquier momento."
+                           Style="{StaticResource Muted}" HorizontalTextAlignment="Center" />
+                </VerticalStackLayout>
+            </CollectionView.EmptyView>
+
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="dto:StationDto">
+                    <Border Style="{StaticResource CardStyle}" Margin="0,0,0,8">
+                        <VerticalStackLayout Spacing="2">
+                            <Label Text="{Binding Name}" Style="{StaticResource Body1Strong}" />
+                            <Label Text="{Binding Country}" Style="{StaticResource Muted}" />
+                        </VerticalStackLayout>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </Grid>
+</ContentPage>

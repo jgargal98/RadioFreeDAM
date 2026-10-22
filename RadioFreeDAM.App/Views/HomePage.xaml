@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:RadioFreeDAM.ViewModels"
+             x:Class="RadioFreeDAM.Views.HomePage"
+             x:DataType="vm:HomeViewModel"
+             Title="Inicio">
+
+    <Grid RowDefinitions="Auto,Auto,*"
+          Padding="{StaticResource LayoutPadding}"
+          RowSpacing="{StaticResource LayoutSpacing}">
+
+        <!-- Cabecera: título, estado del servidor y botón de recargar -->
+        <Grid Grid.Row="0" ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto" RowSpacing="6">
+            <Label Text="Emisoras" Style="{StaticResource Title1}" />
+
+            <Border Grid.Row="1" Style="{StaticResource ChipStyle}">
+                <HorizontalStackLayout Spacing="6">
+                    <Ellipse WidthRequest="8" HeightRequest="8" VerticalOptions="Center"
+                             Fill="{StaticResource Gray400}">
+                        <Ellipse.Triggers>
+                            <DataTrigger TargetType="Ellipse" Binding="{Binding IsServerOk}" Value="True">
+                                <Setter Property="Fill" Value="{StaticResource Primary}" />
+                            </DataTrigger>
+                            <DataTrigger TargetType="Ellipse" Binding="{Binding IsServerDown}" Value="True">
+                                <Setter Property="Fill" Value="{StaticResource Error}" />
+                            </DataTrigger>
+                        </Ellipse.Triggers>
+                    </Ellipse>
+                    <Label Text="{Binding ServerStatusText}" Style="{StaticResource Muted}" FontSize="13" />
+                </HorizontalStackLayout>
+            </Border>
+
+            <Button Grid.RowSpan="2" Grid.Column="1"
+                    Text="Recargar"
+                    Style="{StaticResource OutlineButton}"
+                    VerticalOptions="Center"
+                    Command="{Binding LoadCommand}"
+                    SemanticProperties.Hint="Vuelve a comprobar el servidor y cargar las emisoras" />
+        </Grid>
+
+        <!-- Mensaje de error (servidor caído, catálogo vacío...) -->
+        <Border Grid.Row="1" Style="{StaticResource CardStyle}" IsVisible="{Binding HasError}">
+            <Label Text="{Binding ErrorMessage}" Style="{StaticResource ErrorText}" />
+        </Border>
+
+        <!-- Listado de emisoras -->
+        <CollectionView Grid.Row="2"
+                        ItemsSource="{Binding Stations}"
+                        SelectionMode="None">
+            <CollectionView.ItemsLayout>
+                <LinearItemsLayout Orientation="Vertical" ItemSpacing="8" />
+            </CollectionView.ItemsLayout>
+
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="vm:StationItemViewModel">
+                    <Border Style="{StaticResource CardStyle}"
+                            SemanticProperties.Description="{Binding Name}">
+                        <Border.Triggers>
+                            <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
+                                <Setter Property="Style" Value="{StaticResource SelectedCardStyle}" />
+                            </DataTrigger>
+                        </Border.Triggers>
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer
+                                Command="{Binding SelectStationCommand, Source={RelativeSource AncestorType={x:Type vm:HomeViewModel}}, x:DataType=vm:HomeViewModel}"
+                                CommandParameter="{Binding .}" />
+                        </Border.GestureRecognizers>
+
+                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                            <Border Style="{StaticResource StationAvatarStyle}" WidthRequest="48" HeightRequest="48">
+                                <Label Text="{Binding Initial}"
+                                       TextColor="{StaticResource OnPrimary}"
+                                       FontSize="22" FontAttributes="Bold"
+                                       HorizontalOptions="Center" VerticalOptions="Center" />
+                            </Border>
+
+                            <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
+                                <Label Text="{Binding Name}" Style="{StaticResource Body1Strong}" />
+                                <Label Text="{Binding Subtitle}" Style="{StaticResource Muted}" LineBreakMode="TailTruncation" />
+                            </VerticalStackLayout>
+
+                            <Label Grid.Column="2"
+                                   Text="Sonando"
+                                   IsVisible="{Binding IsPlaying}"
+                                   FontSize="13" FontAttributes="Bold"
+                                   TextColor="{AppThemeBinding Light={StaticResource PrimaryTextLight}, Dark={StaticResource PrimaryTextDark}}"
+                                   VerticalOptions="Center" />
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <ActivityIndicator Grid.Row="2"
+                           IsRunning="{Binding IsLoading}"
+                           IsVisible="{Binding IsLoading}"
+                           HorizontalOptions="Center" VerticalOptions="Center"
+                           Color="{StaticResource Primary}" />
+    </Grid>
+</ContentPage>
