@@ -29,7 +29,7 @@ App MAUI ──HTTP/JSON──▶ API ASP.NET Core ──▶ Radio Browser    (e
 ### API
 
 - `Controllers/`: endpoints HTTP (`HealthController`, `StationsController`).
-- `Services/`: obtención de emisoras (`IStationService`). `RadioBrowserStationService` consulta Radio Browser; `MockStationService` sirve datos de prueba sin Internet.
+- `Services/`: obtención de emisoras (`IStationService`). `RadioBrowserStationService` consulta Radio Browser; `MockStationService` sirve datos de prueba sin Internet; `CachedStationService` los envuelve con una caché en memoria.
 - `Models/`: formato externo de Radio Browser (`RadioBrowserStation`), que se convierte a `StationDto` antes de salir de la API.
 
 ## Endpoints
@@ -42,6 +42,12 @@ App MAUI ──HTTP/JSON──▶ API ASP.NET Core ──▶ Radio Browser    (e
 
 Si Radio Browser no responde, la API devuelve `502 Bad Gateway` y la app muestra un mensaje distinto al de "API apagada".
 La configuración de Radio Browser (servidor, país, límites, timeout) está en la sección `RadioBrowser` de `appsettings.json`.
+
+### Caché de emisoras
+
+La API no consulta Radio Browser en cada petición: guarda en memoria las populares durante 10 minutos y cada búsqueda durante 5 (sección `StationCache`).
+Si Radio Browser falla y hay una copia guardada de menos de 24 horas, se devuelve esa copia en lugar del error.
+La caché se vacía al reiniciar la API.
 
 ## Cómo ejecutarlo
 
