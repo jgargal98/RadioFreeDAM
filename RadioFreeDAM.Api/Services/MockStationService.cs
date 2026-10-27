@@ -3,8 +3,8 @@ using RadioFreeDAM.Shared.Dtos;
 namespace RadioFreeDAM.Api.Services;
 
 /// <summary>
-/// Catálogo de prueba para la Fase 1. Las emisoras son ficticias y sus StreamUrl no suenan:
-/// todavía no se reproduce audio real.
+/// Catálogo de prueba de la Fase 1. Las emisoras son ficticias y sus StreamUrl no suenan.
+/// Sirve para trabajar sin Internet: basta con registrarlo en Program.cs en lugar de RadioBrowserStationService.
 /// </summary>
 public class MockStationService : IStationService
 {
@@ -24,5 +24,15 @@ public class MockStationService : IStationService
         new() { Id = "mock-12", Name = "Metal Runtime", Country = "Alemania", Tags = "metal", StreamUrl = "https://stream.example.com/metal-runtime" },
     ];
 
-    public Task<IReadOnlyList<StationDto>> GetStationsAsync() => Task.FromResult(Stations);
+    public Task<IReadOnlyList<StationDto>> GetTopStationsAsync(CancellationToken cancellationToken = default) =>
+        Task.FromResult(Stations);
+
+    public Task<IReadOnlyList<StationDto>> SearchByNameAsync(string name, CancellationToken cancellationToken = default)
+    {
+        IReadOnlyList<StationDto> result = Stations
+            .Where(s => s.Name.Contains(name, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+
+        return Task.FromResult(result);
+    }
 }
