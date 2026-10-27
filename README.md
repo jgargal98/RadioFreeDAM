@@ -23,20 +23,25 @@ App MAUI ──HTTP/JSON──▶ API ASP.NET Core ──▶ Radio Browser    (e
 
 - `Views/`: páginas XAML (Inicio, Reproductor, Favoritos). Solo presentación.
 - `ViewModels/`: estado y comandos de cada pantalla.
-- `Services/`: comunicación con la API (`StationApiService`, `ApiStatusService`), reproductor (`IPlayerService`) y navegación.
-- `Models/`: tipos propios de la app (`PlaybackState`).
+- `Services/`: comunicación con la API (`StationApiService`, `ApiStatusService`), reproductor (`IPlayerService`, implementado con MediaElement en `MediaElementPlayerService`) y navegación.
+- `Models/`: tipos propios de la app (`PlaybackState`: detenido, conectando, reproduciendo, error).
 
 ### API
 
 - `Controllers/`: endpoints HTTP (`HealthController`, `StationsController`).
-- `Services/`: obtención de emisoras (`IStationService`; en la Fase 1, `MockStationService`).
+- `Services/`: obtención de emisoras (`IStationService`). `RadioBrowserStationService` consulta Radio Browser; `MockStationService` sirve datos de prueba sin Internet.
+- `Models/`: formato externo de Radio Browser (`RadioBrowserStation`), que se convierte a `StationDto` antes de salir de la API.
 
 ## Endpoints
 
 | Método | Ruta | Descripción |
 |---|---|---|
 | GET | `/api/health` | Comprueba que el servidor responde. |
-| GET | `/api/stations` | Catálogo de emisoras. |
+| GET | `/api/stations` | Las 20 emisoras más populares de España. |
+| GET | `/api/stations?name=jazz` | Busca por nombre en todo Radio Browser (hasta 30). `400` si la búsqueda tiene menos de 2 caracteres. |
+
+Si Radio Browser no responde, la API devuelve `502 Bad Gateway` y la app muestra un mensaje distinto al de "API apagada".
+La configuración de Radio Browser (servidor, país, límites, timeout) está en la sección `RadioBrowser` de `appsettings.json`.
 
 ## Cómo ejecutarlo
 
@@ -56,6 +61,6 @@ La dirección de la API se elige en `RadioFreeDAM.App/Services/ApiConfig.cs`:
 ## Fases
 
 - [x] **Fase 1** · Arranque, interfaz y arquitectura: navegación por pestañas, 12 emisoras de prueba servidas por la API y reproductor simulado.
-- [ ] **Fase 2** · Emisoras reales (Radio Browser) y reproducción en streaming.
+- [x] **Fase 2** · Emisoras reales de Radio Browser, búsqueda por nombre, reproducción en streaming con MediaElement y mensajes de error de catálogo, conexión y audio.
 - [ ] **Fase 3** · Usuarios y favoritas persistentes.
 - [ ] **Fase 4** · Consolidación, mejora y entrega.
