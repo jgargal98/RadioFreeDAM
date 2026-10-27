@@ -9,3 +9,14 @@ GET {{RadioFreeDAM.Api_HostAddress}}/api/stations
 Accept: application/json
 
 ###
+
+GET {{RadioFreeDAM.Api_HostAddress}}/api/stations?name=jazz
+Accept: application/json
+
+###
+
+# Búsqueda demasiado corta → 400
+GET {{RadioFreeDAM.Api_HostAddress}}/api/stations?name=a
+Accept: application/json
+
+###
