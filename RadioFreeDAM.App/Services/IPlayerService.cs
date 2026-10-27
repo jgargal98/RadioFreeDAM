@@ -10,10 +10,13 @@ public interface IPlayerService
 
     PlaybackState State { get; }
 
-    /// <summary>Se lanza cada vez que cambia la emisora o el estado de reproducción.</summary>
+    /// <summary>Mensaje para el usuario cuando <see cref="State"/> es Error.</summary>
+    string? ErrorMessage { get; }
+
+    /// <summary>Se lanza (en el hilo de la interfaz) cada vez que cambia la emisora o el estado.</summary>
     event EventHandler? StateChanged;
 
-    /// <summary>Selecciona una emisora. Si era otra la que sonaba, la detiene.</summary>
+    /// <summary>Selecciona una emisora. Si sonaba otra, la detiene; la nueva no suena hasta llamar a Play.</summary>
     void Select(StationDto station);
 
     void Play();

@@ -2,12 +2,19 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:f="clr-namespace:Fonts"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              xmlns:vm="clr-namespace:RadioFreeDAM.ViewModels"
              x:Class="RadioFreeDAM.Views.PlayerPage"
              x:DataType="vm:PlayerViewModel"
              Title="Reproductor">
 
     <Grid Padding="{StaticResource LayoutPadding}">
+
+        <!-- Control de audio: invisible, lo maneja MediaElementPlayerService -->
+        <toolkit:MediaElement x:Name="AudioPlayer"
+                              ShouldAutoPlay="True"
+                              ShouldShowPlaybackControls="False"
+                              IsVisible="False" />
 
         <!-- Sin emisora seleccionada -->
         <VerticalStackLayout IsVisible="{Binding HasStation, Converter={StaticResource InvertedBoolConverter}}"
@@ -24,30 +31,43 @@
                              VerticalOptions="Center" HorizontalOptions="Center"
                              Spacing="20" MaximumWidthRequest="420">
 
-            <Border Style="{StaticResource StationAvatarStyle}"
-                    StrokeShape="RoundRectangle 28"
-                    WidthRequest="180" HeightRequest="180"
-                    HorizontalOptions="Center">
-                <Label Text="{Binding StationInitial}"
-                       TextColor="{StaticResource OnPrimary}"
-                       FontSize="84" FontAttributes="Bold"
-                       HorizontalOptions="Center" VerticalOptions="Center" />
-            </Border>
+            <!-- Logo de la emisora; si no tiene, la inicial sobre fondo verde -->
+            <Grid WidthRequest="180" HeightRequest="180" HorizontalOptions="Center">
+                <Border Style="{StaticResource StationAvatarStyle}" StrokeShape="RoundRectangle 28"
+                        IsVisible="{Binding HasFavicon, Converter={StaticResource InvertedBoolConverter}}">
+                    <Label Text="{Binding StationInitial}"
+                           TextColor="{StaticResource OnPrimary}"
+                           FontSize="84" FontAttributes="Bold"
+                           HorizontalOptions="Center" VerticalOptions="Center" />
+                </Border>
+                <Border Style="{StaticResource StationLogoStyle}" StrokeShape="RoundRectangle 28" Padding="16"
+                        IsVisible="{Binding HasFavicon}">
+                    <Image Source="{Binding CurrentStation.FaviconUrl}" Aspect="AspectFit" />
+                </Border>
+            </Grid>
 
             <VerticalStackLayout Spacing="4">
                 <Label Text="{Binding CurrentStation.Name}" Style="{StaticResource Title1}" HorizontalTextAlignment="Center" />
                 <Label Text="{Binding StationSubtitle}" Style="{StaticResource Muted}" HorizontalTextAlignment="Center" />
+                <Label Text="{Binding StationQuality}" Style="{StaticResource Muted}" FontSize="12" HorizontalTextAlignment="Center" />
             </VerticalStackLayout>
 
-            <Label Text="{Binding StatusText}" Style="{StaticResource Body1Strong}" HorizontalTextAlignment="Center">
-                <Label.Triggers>
-                    <DataTrigger TargetType="Label" Binding="{Binding IsPlaying}" Value="True">
-                        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource PrimaryTextLight}, Dark={StaticResource PrimaryTextDark}}" />
-                    </DataTrigger>
-                </Label.Triggers>
-            </Label>
+            <HorizontalStackLayout HorizontalOptions="Center" Spacing="8">
+                <ActivityIndicator IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}"
+                                   WidthRequest="20" HeightRequest="20" Color="{StaticResource Primary}" />
+                <Label Text="{Binding StatusText}" Style="{StaticResource Body1Strong}" VerticalOptions="Center">
+                    <Label.Triggers>
+                        <DataTrigger TargetType="Label" Binding="{Binding IsPlaying}" Value="True">
+                            <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource PrimaryTextLight}, Dark={StaticResource PrimaryTextDark}}" />
+                        </DataTrigger>
+                        <DataTrigger TargetType="Label" Binding="{Binding HasError}" Value="True">
+                            <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource Error}, Dark={StaticResource ErrorDark}}" />
+                        </DataTrigger>
+                    </Label.Triggers>
+                </Label>
+            </HorizontalStackLayout>
 
-            <!-- Botón principal: el icono cambia entre reproducir y detener -->
+            <!-- Botón principal: reproducir, o detener mientras suena o conecta -->
             <ImageButton Command="{Binding TogglePlaybackCommand}"
                          WidthRequest="88" HeightRequest="88"
                          CornerRadius="44" Padding="22"
@@ -60,7 +80,7 @@
                                      Color="{StaticResource OnPrimary}" Size="44" />
                 </ImageButton.Source>
                 <ImageButton.Triggers>
-                    <DataTrigger TargetType="ImageButton" Binding="{Binding IsPlaying}" Value="True">
+                    <DataTrigger TargetType="ImageButton" Binding="{Binding IsActive}" Value="True">
                         <Setter Property="Source">
                             <FontImageSource Glyph="{x:Static f:FluentUI.stop_24_regular}"
                                              FontFamily="{x:Static f:FluentUI.FontFamily}"
@@ -70,8 +90,13 @@
                 </ImageButton.Triggers>
             </ImageButton>
 
-            <Label Text="Reproductor simulado (Fase 1): todavía no suena audio."
-                   Style="{StaticResource Muted}" FontSize="12" HorizontalTextAlignment="Center" />
+            <!-- Error de audio: el botón de reproducir sirve para reintentar -->
+            <Border Style="{StaticResource CardStyle}" IsVisible="{Binding HasError}">
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="{Binding ErrorMessage}" Style="{StaticResource ErrorText}" HorizontalTextAlignment="Center" />
+                    <Label Text="Pulsa reproducir para volver a intentarlo." Style="{StaticResource Muted}" FontSize="12" HorizontalTextAlignment="Center" />
+                </VerticalStackLayout>
+            </Border>
         </VerticalStackLayout>
     </Grid>
 </ContentPage>

@@ -11,6 +11,8 @@ namespace RadioFreeDAM
             builder
                 .UseMauiApp<App>()
                 .UseMauiCommunityToolkit()
+                // Reproducción de audio. Sin servicio en primer plano de Android: no hay notificación de reproducción.
+                .UseMauiCommunityToolkitMediaElement(isAndroidForegroundServiceEnabled: false)
                 .ConfigureMauiHandlers(handlers =>
                 {
 #if WINDOWS
@@ -43,7 +45,10 @@ namespace RadioFreeDAM
             // Services
             builder.Services.AddSingleton<IApiStatusService, ApiStatusService>();
             builder.Services.AddSingleton<IStationApiService, StationApiService>();
-            builder.Services.AddSingleton<IPlayerService, SimulatedPlayerService>();
+            // Una sola instancia: PlayerPage la recibe como clase concreta (para entregarle el MediaElement)
+            // y los ViewModels como IPlayerService.
+            builder.Services.AddSingleton<MediaElementPlayerService>();
+            builder.Services.AddSingleton<IPlayerService>(sp => sp.GetRequiredService<MediaElementPlayerService>());
             builder.Services.AddSingleton<INavigationService, ShellNavigationService>();
 
             // ViewModels
