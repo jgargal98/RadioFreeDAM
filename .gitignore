@@ -63,3 +63,6 @@ nunit-*.xml
 
 # Archivos del sistema operativo
 .DS_Store
+
+# Enunciado del proyecto (material del profesor, no se sube)
+RadioFreeDAM_NET_MAUI_Curso_2026_2027.pdf
