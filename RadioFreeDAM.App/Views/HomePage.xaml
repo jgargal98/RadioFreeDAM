@@ -6,7 +6,7 @@
              x:DataType="vm:HomeViewModel"
              Title="Inicio">
 
-    <Grid RowDefinitions="Auto,Auto,*"
+    <Grid RowDefinitions="Auto,Auto,Auto,Auto,*"
           Padding="{StaticResource LayoutPadding}"
           RowSpacing="{StaticResource LayoutSpacing}">
 
@@ -35,17 +35,26 @@
                     Text="Recargar"
                     Style="{StaticResource OutlineButton}"
                     VerticalOptions="Center"
-                    Command="{Binding LoadCommand}"
+                    Command="{Binding RefreshCommand}"
                     SemanticProperties.Hint="Vuelve a comprobar el servidor y cargar las emisoras" />
         </Grid>
 
-        <!-- Mensaje de error (servidor caído, catálogo vacío...) -->
-        <Border Grid.Row="1" Style="{StaticResource CardStyle}" IsVisible="{Binding HasError}">
+        <!-- Búsqueda por nombre: la resuelve la API consultando Radio Browser -->
+        <SearchBar Grid.Row="1"
+                   Placeholder="Buscar emisora por nombre"
+                   Text="{Binding SearchText}"
+                   SearchCommand="{Binding SearchCommand}"
+                   SemanticProperties.Hint="Escribe el nombre de una emisora y pulsa buscar" />
+
+        <!-- Mensaje de error (servidor caído, Radio Browser no disponible...) -->
+        <Border Grid.Row="2" Style="{StaticResource CardStyle}" IsVisible="{Binding HasError}">
             <Label Text="{Binding ErrorMessage}" Style="{StaticResource ErrorText}" />
         </Border>
 
+        <Label Grid.Row="3" Text="{Binding ListTitle}" Style="{StaticResource Body1Strong}" />
+
         <!-- Listado de emisoras -->
-        <CollectionView Grid.Row="2"
+        <CollectionView Grid.Row="4"
                         ItemsSource="{Binding Stations}"
                         SelectionMode="None">
             <CollectionView.ItemsLayout>
@@ -68,15 +77,22 @@
                         </Border.GestureRecognizers>
 
                         <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
-                            <Border Style="{StaticResource StationAvatarStyle}" WidthRequest="48" HeightRequest="48">
-                                <Label Text="{Binding Initial}"
-                                       TextColor="{StaticResource OnPrimary}"
-                                       FontSize="22" FontAttributes="Bold"
-                                       HorizontalOptions="Center" VerticalOptions="Center" />
-                            </Border>
+                            <!-- Logo de la emisora; si no tiene, la inicial sobre fondo verde -->
+                            <Grid WidthRequest="48" HeightRequest="48">
+                                <Border Style="{StaticResource StationAvatarStyle}"
+                                        IsVisible="{Binding HasFavicon, Converter={StaticResource InvertedBoolConverter}}">
+                                    <Label Text="{Binding Initial}"
+                                           TextColor="{StaticResource OnPrimary}"
+                                           FontSize="22" FontAttributes="Bold"
+                                           HorizontalOptions="Center" VerticalOptions="Center" />
+                                </Border>
+                                <Border Style="{StaticResource StationLogoStyle}" IsVisible="{Binding HasFavicon}">
+                                    <Image Source="{Binding FaviconUrl}" Aspect="AspectFit" />
+                                </Border>
+                            </Grid>
 
                             <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
-                                <Label Text="{Binding Name}" Style="{StaticResource Body1Strong}" />
+                                <Label Text="{Binding Name}" Style="{StaticResource Body1Strong}" LineBreakMode="TailTruncation" />
                                 <Label Text="{Binding Subtitle}" Style="{StaticResource Muted}" LineBreakMode="TailTruncation" />
                             </VerticalStackLayout>
 
@@ -92,7 +108,7 @@
             </CollectionView.ItemTemplate>
         </CollectionView>
 
-        <ActivityIndicator Grid.Row="2"
+        <ActivityIndicator Grid.Row="4"
                            IsRunning="{Binding IsLoading}"
                            IsVisible="{Binding IsLoading}"
                            HorizontalOptions="Center" VerticalOptions="Center"

@@ -134,6 +134,15 @@
         <Setter Property="Background" Value="{StaticResource Primary}" />
     </Style>
 
+    <!-- Fondo blanco para los logos de las emisoras (suelen estar pensados para fondo claro) -->
+    <Style x:Key="StationLogoStyle"
+           TargetType="Border">
+        <Setter Property="StrokeShape" Value="RoundRectangle 10" />
+        <Setter Property="StrokeThickness" Value="0" />
+        <Setter Property="Padding" Value="4" />
+        <Setter Property="Background" Value="{StaticResource White}" />
+    </Style>
+
     <!-- Pastilla de estado (servidor conectado / sin conexión) -->
     <Style x:Key="ChipStyle"
            TargetType="Border">

@@ -12,11 +12,13 @@ public partial class StationItemViewModel(StationDto station) : ObservableObject
 
     public string Name => Station.Name;
 
+    public string? FaviconUrl => Station.FaviconUrl;
+
+    public bool HasFavicon => !string.IsNullOrWhiteSpace(Station.FaviconUrl);
+
     public string Initial => string.IsNullOrWhiteSpace(Station.Name) ? "?" : Station.Name[..1].ToUpperInvariant();
 
-    public string Subtitle => string.IsNullOrWhiteSpace(Station.Tags)
-        ? Station.Country
-        : $"{Station.Country} · {Station.Tags.Replace(",", ", ")}";
+    public string Subtitle => StationText.Describe(Station.Country, Station.Tags, maxTags: 3);
 
     [ObservableProperty]
     public partial bool IsSelected { get; set; }
