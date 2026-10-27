@@ -4,7 +4,7 @@ namespace RadioFreeDAM.Api.Services;
 
 /// <summary>
 /// Catálogo de prueba de la Fase 1. Las emisoras son ficticias y sus StreamUrl no suenan.
-/// Sirve para trabajar sin Internet: basta con registrarlo en Program.cs en lugar de RadioBrowserStationService.
+/// Sirve para trabajar sin Internet: basta con usarlo en Program.cs en lugar de RadioBrowserStationService.
 /// </summary>
 public class MockStationService : IStationService
 {
