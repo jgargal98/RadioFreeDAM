@@ -1,4 +1,6 @@
-﻿using CommunityToolkit.Maui;
+﻿using System.Net;
+using CommunityToolkit.Maui;
+using Microsoft.Extensions.Http.Resilience;
 using Microsoft.Extensions.Logging;
 
 namespace RadioFreeDAM
@@ -36,11 +38,31 @@ namespace RadioFreeDAM
 #endif
 
             // Un único HttpClient apuntando a NUESTRA API (la app nunca habla con Radio Browser ni con la BD).
-            builder.Services.AddSingleton(_ => new HttpClient
-            {
-                BaseAddress = new Uri(ApiConfig.BaseUrl),
-                Timeout = TimeSpan.FromSeconds(10)
-            });
+            builder.Services.AddHttpClient(ApiConfig.HttpClientName, client =>
+                {
+                    client.BaseAddress = new Uri(ApiConfig.BaseUrl);
+                    // Los tiempos los controla la política de reintentos de abajo.
+                    client.Timeout = Timeout.InfiniteTimeSpan;
+                })
+                .AddStandardResilienceHandler(resilience =>
+                {
+                    // Reintenta solo cortes de red y tiempos agotados. No reintenta un 502 (la API ya ha
+                    // reintentado con Radio Browser) ni los errores de validación (400, 401, 409...).
+                    resilience.Retry.ShouldHandle = args => ValueTask.FromResult(args.Outcome switch
+                    {
+                        { Exception: HttpRequestException or Polly.Timeout.TimeoutRejectedException } => true,
+                        { Result.StatusCode: HttpStatusCode.ServiceUnavailable or HttpStatusCode.RequestTimeout } => true,
+                        _ => false
+                    });
+                    // Nunca repite un POST o DELETE: podría registrar dos veces o duplicar una favorita.
+                    resilience.Retry.DisableForUnsafeHttpMethods();
+                    resilience.Retry.MaxRetryAttempts = 2;
+                    resilience.Retry.Delay = TimeSpan.FromMilliseconds(500);
+                    resilience.AttemptTimeout.Timeout = TimeSpan.FromSeconds(10);
+                    resilience.TotalRequestTimeout.Timeout = TimeSpan.FromSeconds(25);
+                });
+            builder.Services.AddSingleton(sp =>
+                sp.GetRequiredService<IHttpClientFactory>().CreateClient(ApiConfig.HttpClientName));
 
             // Services
             builder.Services.AddSingleton<IApiStatusService, ApiStatusService>();

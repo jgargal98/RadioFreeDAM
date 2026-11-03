@@ -16,6 +16,10 @@ public partial class LoginViewModel(
     [ObservableProperty]
     public partial string Password { get; set; } = string.Empty;
 
+    /// <summary>Casilla «Mantener la sesión iniciada».</summary>
+    [ObservableProperty]
+    public partial bool RememberMe { get; set; } = true;
+
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasError))]
     public partial string? ErrorMessage { get; set; }
@@ -42,10 +46,10 @@ public partial class LoginViewModel(
         try
         {
             var response = await authApi.LoginAsync(new LoginRequest { Email = Email.Trim(), Password = Password });
-            await AccountFlow.CompleteSignInAsync(response, session, favorites, navigation);
+            await AccountFlow.CompleteSignInAsync(response, RememberMe, session, favorites, navigation);
             Password = string.Empty;
         }
-        catch (Exception ex) when (ex is ApiException or HttpRequestException or TaskCanceledException)
+        catch (Exception ex) when (ApiException.IsCommunicationError(ex))
         {
             ErrorMessage = ApiException.ToUserMessage(ex);
         }
@@ -68,18 +72,19 @@ internal static class AccountFlow
 {
     public static async Task CompleteSignInAsync(
         AuthResponse response,
+        bool remember,
         ISessionService session,
         IFavoritesService favorites,
         INavigationService navigation)
     {
-        session.SignIn(response);
+        await session.SignInAsync(response, remember);
         await navigation.CloseAccountPagesAsync();
 
         try
         {
             await favorites.LoadAsync();
         }
-        catch (Exception ex) when (ex is ApiException or HttpRequestException or TaskCanceledException)
+        catch (Exception ex) when (ApiException.IsCommunicationError(ex))
         {
             // La sesión ya está iniciada; la pantalla Favoritos mostrará el error y permitirá reintentar.
         }

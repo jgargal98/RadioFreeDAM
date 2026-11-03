@@ -69,7 +69,7 @@ public partial class PlayerViewModel : ObservableObject
             else
                 await _favorites.AddAsync(CurrentStation);
         }
-        catch (Exception ex) when (ex is ApiException or HttpRequestException or TaskCanceledException)
+        catch (Exception ex) when (ApiException.IsCommunicationError(ex))
         {
             FavoriteErrorMessage = ApiException.ToUserMessage(ex);
         }

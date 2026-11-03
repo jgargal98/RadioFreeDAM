@@ -36,13 +36,21 @@ public class ApiException(string message, HttpStatusCode statusCode) : Exception
         throw new ApiException(message, response.StatusCode);
     }
 
+    /// <summary>
+    /// Errores esperables al hablar con la API: respuesta de error, sin conexión, tiempo agotado
+    /// o reintentos agotados (Polly). Los ViewModels los capturan para mostrar un mensaje.
+    /// </summary>
+    public static bool IsCommunicationError(Exception ex) =>
+        ex is ApiException or HttpRequestException or TaskCanceledException or Polly.ExecutionRejectedException;
+
     /// <summary>Mensaje para el usuario según el tipo de error.</summary>
     public static string ToUserMessage(Exception ex) => ex switch
     {
         ApiException api => api.Message,
-        HttpRequestException { StatusCode: null } =>
+        HttpRequestException { StatusCode: null } or Polly.CircuitBreaker.BrokenCircuitException =>
             $"No se puede conectar con la API en {ApiConfig.BaseUrl}. Comprueba que está arrancada.",
-        TaskCanceledException => "El servidor está tardando demasiado en responder. Inténtalo de nuevo.",
+        TaskCanceledException or Polly.Timeout.TimeoutRejectedException =>
+            "El servidor está tardando demasiado en responder. Inténtalo de nuevo.",
         _ => "Ha ocurrido un error inesperado. Inténtalo de nuevo."
     };
 

@@ -7,6 +7,9 @@ public static class ApiConfig
 {
     public const int Port = 5080;
 
+    /// <summary>Nombre del HttpClient configurado en MauiProgram (con reintentos).</summary>
+    public const string HttpClientName = "RadioFreeDAM.Api";
+
     /// <summary>
     /// IP local del ordenador donde corre la API, para probar con un móvil Android real
     /// en la misma red Wi-Fi. Se consulta con <c>ipconfig</c> (Dirección IPv4).

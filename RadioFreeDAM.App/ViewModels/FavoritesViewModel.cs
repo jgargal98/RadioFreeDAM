@@ -73,7 +73,7 @@ public partial class FavoritesViewModel : ObservableObject
         {
             await _favorites.LoadAsync();
         }
-        catch (Exception ex) when (ex is ApiException or HttpRequestException or TaskCanceledException)
+        catch (Exception ex) when (ApiException.IsCommunicationError(ex))
         {
             ErrorMessage = ApiException.ToUserMessage(ex);
         }
@@ -101,7 +101,7 @@ public partial class FavoritesViewModel : ObservableObject
         {
             await _favorites.RemoveAsync(item.StationId);
         }
-        catch (Exception ex) when (ex is ApiException or HttpRequestException or TaskCanceledException)
+        catch (Exception ex) when (ApiException.IsCommunicationError(ex))
         {
             ErrorMessage = ApiException.ToUserMessage(ex);
         }

@@ -11,7 +11,7 @@ public class ApiStatusService(HttpClient httpClient) : IApiStatusService
             var health = await httpClient.GetFromJsonAsync<HealthDto>("api/health");
             return health?.Status == "ok";
         }
-        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
+        catch (Exception ex) when (ApiException.IsCommunicationError(ex))
         {
             // Sin red, API apagada o tiempo de espera agotado.
             return false;

@@ -37,6 +37,15 @@
                        ReturnCommand="{Binding RegisterCommand}" />
             </VerticalStackLayout>
 
+            <HorizontalStackLayout Spacing="4">
+                <CheckBox IsChecked="{Binding RememberMe}" Color="{StaticResource Primary}" VerticalOptions="Center" />
+                <Label Text="Mantener la sesión iniciada" VerticalOptions="Center">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnRememberLabelTapped" />
+                    </Label.GestureRecognizers>
+                </Label>
+            </HorizontalStackLayout>
+
             <Border Style="{StaticResource CardStyle}" IsVisible="{Binding HasError}">
                 <Label Text="{Binding ErrorMessage}" Style="{StaticResource ErrorText}" />
             </Border>

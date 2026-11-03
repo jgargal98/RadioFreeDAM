@@ -8,4 +8,8 @@ public interface IAuthApiService
 
     /// <exception cref="ApiException">401 si el correo o la contraseña no son correctos.</exception>
     Task<AuthResponse> LoginAsync(LoginRequest request);
+
+    /// <summary>Usuario del token actual. Sirve para comprobar si una sesión guardada sigue valiendo.</summary>
+    /// <exception cref="ApiException">401 si el token ya no vale.</exception>
+    Task<UserDto> GetCurrentUserAsync();
 }

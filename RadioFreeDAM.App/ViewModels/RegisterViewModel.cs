@@ -27,6 +27,10 @@ public partial class RegisterViewModel(
     [ObservableProperty]
     public partial string ConfirmPassword { get; set; } = string.Empty;
 
+    /// <summary>Casilla «Mantener la sesión iniciada».</summary>
+    [ObservableProperty]
+    public partial bool RememberMe { get; set; } = true;
+
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasError))]
     public partial string? ErrorMessage { get; set; }
@@ -55,10 +59,10 @@ public partial class RegisterViewModel(
                 Email = Email.Trim(),
                 Password = Password
             });
-            await AccountFlow.CompleteSignInAsync(response, session, favorites, navigation);
+            await AccountFlow.CompleteSignInAsync(response, RememberMe, session, favorites, navigation);
             Password = ConfirmPassword = string.Empty;
         }
-        catch (Exception ex) when (ex is ApiException or HttpRequestException or TaskCanceledException)
+        catch (Exception ex) when (ApiException.IsCommunicationError(ex))
         {
             ErrorMessage = ApiException.ToUserMessage(ex);
         }
