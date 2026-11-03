@@ -73,7 +73,7 @@
                                         <Border Style="{StaticResource StationAvatarStyle}"
                                                 IsVisible="{Binding HasFavicon, Converter={StaticResource InvertedBoolConverter}}">
                                             <Label Text="{Binding Initial}"
-                                                   TextColor="{StaticResource OnPrimary}"
+                                                   TextColor="{DynamicResource OnPrimary}"
                                                    FontSize="22" FontAttributes="Bold"
                                                    HorizontalOptions="Center" VerticalOptions="Center" />
                                         </Border>
@@ -91,7 +91,7 @@
                                            Text="Sonando"
                                            IsVisible="{Binding IsPlaying}"
                                            FontSize="13" FontAttributes="Bold"
-                                           TextColor="{AppThemeBinding Light={StaticResource PrimaryTextLight}, Dark={StaticResource PrimaryTextDark}}"
+                                           TextColor="{DynamicResource PrimaryText}"
                                            VerticalOptions="Center" />
 
                                     <ImageButton Grid.Column="3"

@@ -24,7 +24,7 @@
                              Fill="{StaticResource Gray400}">
                         <Ellipse.Triggers>
                             <DataTrigger TargetType="Ellipse" Binding="{Binding IsServerOk}" Value="True">
-                                <Setter Property="Fill" Value="{StaticResource Primary}" />
+                                <Setter Property="Fill" Value="{DynamicResource Primary}" />
                             </DataTrigger>
                             <DataTrigger TargetType="Ellipse" Binding="{Binding IsServerDown}" Value="True">
                                 <Setter Property="Fill" Value="{StaticResource Error}" />
@@ -95,8 +95,8 @@
                             <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
                                 <!-- Se cambian propiedades sueltas (no el Style entero): así se restauran bien al deseleccionar -->
                                 <Setter Property="StrokeThickness" Value="2" />
-                                <Setter Property="Stroke" Value="{StaticResource Primary}" />
-                                <Setter Property="Background" Value="{AppThemeBinding Light={StaticResource PrimarySoftLight}, Dark={StaticResource PrimarySoftDark}}" />
+                                <Setter Property="Stroke" Value="{DynamicResource Primary}" />
+                                <Setter Property="Background" Value="{DynamicResource PrimarySoft}" />
                             </DataTrigger>
                         </Border.Triggers>
                         <Border.GestureRecognizers>
@@ -111,7 +111,7 @@
                                 <Border Style="{StaticResource StationAvatarStyle}"
                                         IsVisible="{Binding HasFavicon, Converter={StaticResource InvertedBoolConverter}}">
                                     <Label Text="{Binding Initial}"
-                                           TextColor="{StaticResource OnPrimary}"
+                                           TextColor="{DynamicResource OnPrimary}"
                                            FontSize="22" FontAttributes="Bold"
                                            HorizontalOptions="Center" VerticalOptions="Center" />
                                 </Border>
@@ -129,7 +129,7 @@
                                    Text="Sonando"
                                    IsVisible="{Binding IsPlaying}"
                                    FontSize="13" FontAttributes="Bold"
-                                   TextColor="{AppThemeBinding Light={StaticResource PrimaryTextLight}, Dark={StaticResource PrimaryTextDark}}"
+                                   TextColor="{DynamicResource PrimaryText}"
                                    VerticalOptions="Center" />
                         </Grid>
                     </Border>
@@ -141,7 +141,7 @@
                            IsRunning="{Binding IsLoading}"
                            IsVisible="{Binding IsLoading}"
                            HorizontalOptions="Center" VerticalOptions="Center"
-                           Color="{StaticResource Primary}" />
+                           Color="{DynamicResource Primary}" />
     </Grid>
 
     <!-- Mini reproductor (su BindingContext lo pone el código de la página) -->

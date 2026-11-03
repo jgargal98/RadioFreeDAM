@@ -38,7 +38,7 @@
             </VerticalStackLayout>
 
             <HorizontalStackLayout Spacing="4">
-                <CheckBox IsChecked="{Binding RememberMe}" Color="{StaticResource Primary}" VerticalOptions="Center" />
+                <CheckBox IsChecked="{Binding RememberMe}" Color="{DynamicResource Primary}" VerticalOptions="Center" />
                 <Label Text="Mantener la sesión iniciada" VerticalOptions="Center">
                     <Label.GestureRecognizers>
                         <TapGestureRecognizer Tapped="OnRememberLabelTapped" />
@@ -54,7 +54,7 @@
                 <Button Text="Crear cuenta" Command="{Binding RegisterCommand}"
                         IsEnabled="{Binding IsBusy, Converter={StaticResource InvertedBoolConverter}}" />
                 <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}"
-                                   WidthRequest="24" HeightRequest="24" Color="{StaticResource OnPrimary}" />
+                                   WidthRequest="24" HeightRequest="24" Color="{DynamicResource OnPrimary}" />
             </Grid>
         </VerticalStackLayout>
     </ScrollView>

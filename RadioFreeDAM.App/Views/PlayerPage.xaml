@@ -46,7 +46,7 @@
                 <Border Style="{StaticResource StationAvatarStyle}" StrokeShape="RoundRectangle 28"
                         IsVisible="{Binding HasFavicon, Converter={StaticResource InvertedBoolConverter}}">
                     <Label Text="{Binding StationInitial}"
-                           TextColor="{StaticResource OnPrimary}"
+                           TextColor="{DynamicResource OnPrimary}"
                            FontSize="84" FontAttributes="Bold"
                            HorizontalOptions="Center" VerticalOptions="Center" />
                 </Border>
@@ -65,11 +65,11 @@
 
             <HorizontalStackLayout HorizontalOptions="Center" Spacing="8">
                 <ActivityIndicator IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}"
-                                   WidthRequest="20" HeightRequest="20" Color="{StaticResource Primary}" />
+                                   WidthRequest="20" HeightRequest="20" Color="{DynamicResource Primary}" />
                 <Label Text="{Binding StatusText}" Style="{StaticResource Body1Strong}" VerticalOptions="Center">
                     <Label.Triggers>
                         <DataTrigger TargetType="Label" Binding="{Binding IsPlaying}" Value="True">
-                            <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource PrimaryTextLight}, Dark={StaticResource PrimaryTextDark}}" />
+                            <Setter Property="TextColor" Value="{DynamicResource PrimaryText}" />
                         </DataTrigger>
                         <DataTrigger TargetType="Label" Binding="{Binding HasError}" Value="True">
                             <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource Error}, Dark={StaticResource ErrorDark}}" />
@@ -82,20 +82,20 @@
             <ImageButton Command="{Binding TogglePlaybackCommand}"
                          WidthRequest="88" HeightRequest="88"
                          CornerRadius="44" Padding="22"
-                         Background="{StaticResource PrimaryBrush}"
+                         Background="{DynamicResource PrimaryBrush}"
                          HorizontalOptions="Center"
                          SemanticProperties.Description="{Binding ToggleButtonText}">
                 <ImageButton.Source>
                     <FontImageSource Glyph="{x:Static f:FluentUI.play_24_regular}"
                                      FontFamily="{x:Static f:FluentUI.FontFamily}"
-                                     Color="{StaticResource OnPrimary}" Size="44" />
+                                     Color="{DynamicResource OnPrimary}" Size="44" />
                 </ImageButton.Source>
                 <ImageButton.Triggers>
                     <DataTrigger TargetType="ImageButton" Binding="{Binding IsActive}" Value="True">
                         <Setter Property="Source">
                             <FontImageSource Glyph="{x:Static f:FluentUI.stop_24_regular}"
                                              FontFamily="{x:Static f:FluentUI.FontFamily}"
-                                             Color="{StaticResource OnPrimary}" Size="44" />
+                                             Color="{DynamicResource OnPrimary}" Size="44" />
                         </Setter>
                     </DataTrigger>
                 </ImageButton.Triggers>
@@ -111,17 +111,17 @@
                     <Button.ImageSource>
                         <FontImageSource Glyph="{x:Static f:FluentUI.heart_24_regular}"
                                          FontFamily="{x:Static f:FluentUI.FontFamily}"
-                                         Color="{AppThemeBinding Light={StaticResource PrimaryTextLight}, Dark={StaticResource PrimaryTextDark}}"
+                                         Color="{DynamicResource PrimaryText}"
                                          Size="20" />
                     </Button.ImageSource>
                     <Button.Triggers>
                         <DataTrigger TargetType="Button" Binding="{Binding IsFavorite}" Value="True">
-                            <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
-                            <Setter Property="TextColor" Value="{StaticResource OnPrimary}" />
+                            <Setter Property="BackgroundColor" Value="{DynamicResource Primary}" />
+                            <Setter Property="TextColor" Value="{DynamicResource OnPrimary}" />
                             <Setter Property="ImageSource">
                                 <FontImageSource Glyph="{x:Static f:FluentUI.heart_24_regular}"
                                                  FontFamily="{x:Static f:FluentUI.FontFamily}"
-                                                 Color="{StaticResource OnPrimary}" Size="20" />
+                                                 Color="{DynamicResource OnPrimary}" Size="20" />
                             </Setter>
                         </DataTrigger>
                         <DataTrigger TargetType="Button" Binding="{Binding IsFavoriteBusy}" Value="True">

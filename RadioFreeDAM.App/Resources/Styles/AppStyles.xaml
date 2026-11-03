@@ -121,7 +121,7 @@
         <Setter Property="StrokeShape" Value="RoundRectangle 10" />
         <Setter Property="StrokeThickness" Value="0" />
         <Setter Property="Padding" Value="0" />
-        <Setter Property="Background" Value="{StaticResource Primary}" />
+        <Setter Property="Background" Value="{DynamicResource Primary}" />
     </Style>
 
     <!-- Fondo blanco para los logos de las emisoras (suelen estar pensados para fondo claro) -->
@@ -148,10 +148,10 @@
     <Style x:Key="OutlineButton"
            TargetType="Button">
         <Setter Property="BackgroundColor" Value="Transparent" />
-        <Setter Property="BorderColor" Value="{StaticResource Primary}" />
+        <Setter Property="BorderColor" Value="{DynamicResource Primary}" />
         <Setter Property="BorderWidth" Value="1.5" />
         <Setter Property="TextColor"
-                Value="{AppThemeBinding Light={StaticResource PrimaryTextLight}, Dark={StaticResource PrimaryTextDark}}" />
+                Value="{DynamicResource PrimaryText}" />
         <Setter Property="FontSize" Value="15" />
     </Style>
 

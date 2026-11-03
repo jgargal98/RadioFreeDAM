@@ -1,23 +1,17 @@
 namespace RadioFreeDAM.ViewModels;
 
 /// <summary>
-/// Colores del Reproductor a partir del color de la emisora. El color se suaviza mezclándolo con el fondo
-/// de la app, así el texto se lee igual de bien en claro y en oscuro sea cual sea la emisora.
+/// Fondo y ondas del Reproductor a partir del color de acento. El color se suaviza mezclándolo con el fondo
+/// de la app, así el texto se lee igual de bien en claro y en oscuro sea cual sea el acento.
 /// </summary>
 public static class PlayerColors
 {
-    /// <summary>Verde de la app: se usa cuando la emisora no tiene logo o es en blanco y negro.</summary>
-    public static readonly Color DefaultAccent = Color.FromArgb("#1DB954");
-
-    private static readonly Color LightBackground = Color.FromArgb("#F5F5F7");
-    private static readonly Color DarkBackground = Color.FromArgb("#121212");
-
-    /// <summary>Degradado de arriba (color de la emisora) hacia abajo (fondo normal de la app).</summary>
+    /// <summary>Degradado de arriba (color de acento) hacia abajo (fondo normal de la app).</summary>
     public static Brush Background(Color accent, bool isDark)
     {
-        var page = isDark ? DarkBackground : LightBackground;
+        var page = isDark ? AccentPalette.DarkBackground : AccentPalette.LightBackground;
         var vivid = WithLuminosity(accent, isDark ? 0.42f : 0.5f);
-        var top = Blend(page, vivid, isDark ? 0.38f : 0.3f);
+        var top = AccentPalette.Blend(page, vivid, isDark ? 0.38f : 0.3f);
 
         return new LinearGradientBrush(
             [
@@ -38,9 +32,4 @@ public static class PlayerColors
         color.ToHsl(out var hue, out var saturation, out _);
         return Color.FromHsla(hue, Math.Max(saturation, 0.35f), luminosity);
     }
-
-    private static Color Blend(Color from, Color to, float amount) => new(
-        from.Red + (to.Red - from.Red) * amount,
-        from.Green + (to.Green - from.Green) * amount,
-        from.Blue + (to.Blue - from.Blue) * amount);
 }

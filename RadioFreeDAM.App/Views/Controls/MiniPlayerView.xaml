@@ -29,7 +29,7 @@
                 <Border Style="{StaticResource StationAvatarStyle}"
                         IsVisible="{Binding HasFavicon, Converter={StaticResource InvertedBoolConverter}}">
                     <Label Text="{Binding StationInitial}"
-                           TextColor="{StaticResource OnPrimary}"
+                           TextColor="{DynamicResource OnPrimary}"
                            FontSize="20" FontAttributes="Bold"
                            HorizontalOptions="Center" VerticalOptions="Center" />
                 </Border>
@@ -42,11 +42,11 @@
                 <Label Text="{Binding CurrentStation.Name}" Style="{StaticResource Body1Strong}" LineBreakMode="TailTruncation" />
                 <HorizontalStackLayout Spacing="6">
                     <ActivityIndicator IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}"
-                                       WidthRequest="14" HeightRequest="14" Color="{StaticResource Primary}" />
+                                       WidthRequest="14" HeightRequest="14" Color="{DynamicResource Primary}" />
                     <Label Text="{Binding StatusText}" Style="{StaticResource Muted}" FontSize="13">
                         <Label.Triggers>
                             <DataTrigger TargetType="Label" Binding="{Binding IsPlaying}" Value="True">
-                                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource PrimaryTextLight}, Dark={StaticResource PrimaryTextDark}}" />
+                                <Setter Property="TextColor" Value="{DynamicResource PrimaryText}" />
                             </DataTrigger>
                             <DataTrigger TargetType="Label" Binding="{Binding HasError}" Value="True">
                                 <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource Error}, Dark={StaticResource ErrorDark}}" />
@@ -61,20 +61,20 @@
                          Command="{Binding TogglePlaybackCommand}"
                          WidthRequest="44" HeightRequest="44"
                          CornerRadius="22" Padding="10"
-                         Background="{StaticResource PrimaryBrush}"
+                         Background="{DynamicResource PrimaryBrush}"
                          VerticalOptions="Center"
                          SemanticProperties.Description="{Binding ToggleButtonText}">
                 <ImageButton.Source>
                     <FontImageSource Glyph="{x:Static f:FluentUI.play_24_regular}"
                                      FontFamily="{x:Static f:FluentUI.FontFamily}"
-                                     Color="{StaticResource OnPrimary}" Size="24" />
+                                     Color="{DynamicResource OnPrimary}" Size="24" />
                 </ImageButton.Source>
                 <ImageButton.Triggers>
                     <DataTrigger TargetType="ImageButton" Binding="{Binding IsActive}" Value="True">
                         <Setter Property="Source">
                             <FontImageSource Glyph="{x:Static f:FluentUI.stop_24_regular}"
                                              FontFamily="{x:Static f:FluentUI.FontFamily}"
-                                             Color="{StaticResource OnPrimary}" Size="24" />
+                                             Color="{DynamicResource OnPrimary}" Size="24" />
                         </Setter>
                     </DataTrigger>
                 </ImageButton.Triggers>

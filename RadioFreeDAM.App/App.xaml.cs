@@ -1,18 +1,19 @@
-﻿namespace RadioFreeDAM
+namespace RadioFreeDAM
 {
     public partial class App : Application
     {
         private readonly ISessionService _session;
         private readonly IFavoritesService _favorites;
 
-        public App(ISessionService session, IFavoritesService favorites, IThemeService theme)
+        public App(ISessionService session, IFavoritesService favorites, IThemeService theme, IAccentService accent)
         {
             InitializeComponent();
             _session = session;
             _favorites = favorites;
 
-            // Tema elegido por el usuario la última vez (sistema, claro u oscuro).
+            // Tema y color de acento elegidos por el usuario la última vez.
             theme.ApplySaved();
+            accent.Initialize();
         }
 
         protected override Window CreateWindow(IActivationState? activationState)
