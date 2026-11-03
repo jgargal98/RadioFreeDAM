@@ -24,7 +24,7 @@
                              Fill="{StaticResource Gray400}">
                         <Ellipse.Triggers>
                             <DataTrigger TargetType="Ellipse" Binding="{Binding IsServerOk}" Value="True">
-                                <Setter Property="Fill" Value="{DynamicResource Primary}" />
+                                <Setter Property="Fill" Value="{StaticResource Online}" />
                             </DataTrigger>
                             <DataTrigger TargetType="Ellipse" Binding="{Binding IsServerDown}" Value="True">
                                 <Setter Property="Fill" Value="{StaticResource Error}" />
