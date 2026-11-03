@@ -21,7 +21,7 @@ App MAUI ──HTTP/JSON──▶ API ASP.NET Core ──▶ Radio Browser      
 
 ### App (MVVM)
 
-- `Views/`: páginas XAML (Inicio, Reproductor, Favoritos, Iniciar sesión, Crear cuenta). Solo presentación.
+- `Views/`: páginas XAML (Inicio, Reproductor, Favoritos, Iniciar sesión, Crear cuenta) y el control `MiniPlayerView`. Solo presentación.
 - `ViewModels/`: estado y comandos de cada pantalla.
 - `Services/`:
   - Comunicación con la API: `StationApiService`, `ApiStatusService`, `AuthApiService`, `FavoritesApiService`.
@@ -63,13 +63,14 @@ Las tablas se crean solas al arrancar la API (`Database.Migrate()`).
 | GET | `/api/stations?name=jazz` | Busca por nombre en todo Radio Browser (hasta 30). `400` si la búsqueda tiene menos de 2 caracteres. |
 | POST | `/api/auth/register` | Crea una cuenta y devuelve un token. `400` datos no válidos, `409` correo ya registrado. |
 | POST | `/api/auth/login` | Devuelve un token. `401` si el correo o la contraseña no son correctos. |
+| GET | `/api/auth/me` 🔒 | Usuario del token. La app lo usa para validar una sesión recordada. `401` si ya no vale. |
 | GET | `/api/favorites` 🔒 | Favoritas del usuario, con los datos actuales de cada emisora. |
 | POST | `/api/favorites` 🔒 | Añade `{ "stationId": "..." }`. `404` emisora inexistente, `409` ya era favorita. |
 | DELETE | `/api/favorites/{stationId}` 🔒 | Quita una favorita. `404` si no estaba. |
 
 🔒 = necesita la cabecera `Authorization: Bearer <token>`; sin ella, `401`. El usuario sale del token, nunca de la URL.
 
-Si Radio Browser no responde, la API devuelve `502 Bad Gateway` y la app muestra un mensaje distinto al de "API apagada".
+Las peticiones a Radio Browser se reintentan hasta 2 veces si fallan por un corte momentáneo. Si aun así no responde, la API devuelve `502 Bad Gateway` y la app muestra un mensaje distinto al de "API apagada".
 La configuración de Radio Browser (servidor, país, límites, timeout) está en la sección `RadioBrowser` de `appsettings.json`.
 
 ### Caché de emisoras
@@ -108,6 +109,14 @@ La dirección de la API se elige en `RadioFreeDAM.App/Services/ApiConfig.cs`:
 - Emulador Android → `http://10.0.2.2:5080/`
 - Móvil Android real → `http://<IP del ordenador>:5080/`. Cambia `LocalNetworkHost` por la IPv4 de `ipconfig`; el móvil y el ordenador tienen que estar en la misma red, y el Firewall de Windows debe permitir el puerto 5080.
 
+### Pruebas automáticas
+
+`RadioFreeDAM.Api.Tests` (xUnit) comprueba las reglas de negocio con una base de datos SQLite en memoria que tiene los mismos índices únicos y claves foráneas que MariaDB: correo único, contraseña con hash, login incorrecto, favoritas sin duplicados, de un usuario existente y aisladas por usuario, y el comportamiento de la caché.
+
+```bash
+dotnet test RadioFreeDAM.Api.Tests
+```
+
 ### Cambios en la base de datos
 
 Las migraciones se generan con la herramienta local `dotnet-ef` (versión fijada en `dotnet-tools.json`):
@@ -125,4 +134,9 @@ dotnet tool run dotnet-ef migrations add NombreDelCambio --project RadioFreeDAM.
 - [x] **Fase 1** · Arranque, interfaz y arquitectura: navegación por pestañas, 12 emisoras de prueba servidas por la API y reproductor simulado.
 - [x] **Fase 2** · Emisoras reales de Radio Browser, búsqueda por nombre, reproducción en streaming con MediaElement y mensajes de error de catálogo, conexión y audio.
 - [x] **Fase 3** · Usuarios (registro e inicio de sesión con JWT) y favoritas persistentes en MariaDB.
-- [ ] **Fase 4** · Consolidación, mejora y entrega.
+- [x] **Fase 4** · Consolidación y mejoras:
+  - **Mini reproductor** en Inicio y Favoritos.
+  - **Recordar la sesión** (casilla «Mantener la sesión iniciada»; token en SecureStorage, validado con `api/auth/me`).
+  - **Búsqueda mientras se escribe** con mensaje de «sin resultados».
+  - Reintentos automáticos ante cortes de red (app → API y API → Radio Browser) y pruebas automáticas de la API.
+- [ ] **Entrega** · Vídeo de demostración (3 de diciembre).
