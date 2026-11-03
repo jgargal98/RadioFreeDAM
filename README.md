@@ -41,6 +41,13 @@ App MAUI ──HTTP/JSON──▶ API ASP.NET Core ──▶ Radio Browser      
 - `Models/`: entidades de la base de datos (`User`, `Favorite`) y formato externo de Radio Browser (`RadioBrowserStation`).
 - `ApiExceptionHandler`: convierte los errores de negocio en respuestas 400/401/404/409/502.
 
+### Diseño
+
+- Tema **claro y oscuro**: sigue al sistema o se elige en la app (botón de la cabecera de Inicio); la elección se recuerda.
+- Color de acento verde; icono y pantalla de carga con una radio clásica.
+- **Reproductor**: el fondo toma el color dominante del logo de la emisora (`StationColorService`, con SkiaSharp), suavizado para que el texto se lea en ambos temas. Sin logo, el verde de la app.
+- **Ondas de sonido** de fondo (`SoundWavesView`, dibujadas con `GraphicsView`): se mueven mientras suena y se aplanan al detener. Son decorativas: MediaElement no da acceso al volumen real.
+
 ## Base de datos
 
 MariaDB remota del centro (servidor, base de datos y usuario proporcionados por el profesor), compartida con otro proyecto. Por eso todas las tablas llevan el prefijo `rfd_`:
