@@ -2,16 +2,18 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:RadioFreeDAM.ViewModels"
+             xmlns:controls="clr-namespace:RadioFreeDAM.Views.Controls"
              x:Class="RadioFreeDAM.Views.RegisterPage"
              x:DataType="vm:RegisterViewModel"
+             Shell.NavBarIsVisible="False"
              Title="Crear cuenta">
-
     <ScrollView>
         <VerticalStackLayout Padding="{StaticResource LayoutPadding}" Spacing="16"
-                             MaximumWidthRequest="420" VerticalOptions="Center">
+                             MaximumWidthRequest="420">
 
             <VerticalStackLayout Spacing="4">
-                <Label Text="Crear cuenta" Style="{StaticResource Title1}" />
+                <!-- Cabecera propia con flecha de volver (en lugar de la barra de navegación nativa) -->
+                <controls:BackHeaderView Title="Crear cuenta" />
                 <Label Text="Tus favoritas se guardarán en tu cuenta." Style="{StaticResource Muted}" />
             </VerticalStackLayout>
 

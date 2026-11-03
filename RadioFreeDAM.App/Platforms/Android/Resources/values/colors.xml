@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    Colores del tema nativo de Android (tema claro).
+    colorPrimary/colorPrimaryDark pintan la barra de estado en las pantallas con barra de navegación:
+    se usa el fondo de la app para que no destaque. El acento de verdad lo pone AccentService.
+-->
 <resources>
-    <color name="colorPrimary">#1DB954</color>
-    <color name="colorPrimaryDark">#127A39</color>
+    <color name="colorPrimary">#F5F5F7</color>
+    <color name="colorPrimaryDark">#F5F5F7</color>
     <color name="colorAccent">#1DB954</color>
 </resources>

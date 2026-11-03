@@ -96,6 +96,17 @@
                 Value="{AppThemeBinding Light={StaticResource MutedTextLight}, Dark={StaticResource MutedTextDark}}" />
     </Style>
 
+    <!-- Título de sección (Ajustes) -->
+    <Style x:Key="SectionTitle"
+           TargetType="Label">
+        <Setter Property="FontSize"
+                Value="14" />
+        <Setter Property="FontAttributes"
+                Value="Bold" />
+        <Setter Property="TextColor"
+                Value="{AppThemeBinding Light={StaticResource MutedTextLight}, Dark={StaticResource MutedTextDark}}" />
+    </Style>
+
     <Style x:Key="ErrorText"
            TargetType="Label">
         <Setter Property="FontSize"

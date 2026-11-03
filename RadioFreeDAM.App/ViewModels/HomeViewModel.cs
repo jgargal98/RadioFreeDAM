@@ -18,8 +18,6 @@ public partial class HomeViewModel : ObservableObject
     private readonly IStationApiService _stationApiService;
     private readonly IPlayerService _playerService;
     private readonly INavigationService _navigationService;
-    private readonly IThemeService _themeService;
-    private readonly IDialogService _dialogService;
     private bool _isInitialized;
 
     /// <summary>Texto de la búsqueda cuyos resultados se muestran; null si se muestran las populares.</summary>
@@ -34,16 +32,12 @@ public partial class HomeViewModel : ObservableObject
         IApiStatusService apiStatusService,
         IStationApiService stationApiService,
         IPlayerService playerService,
-        INavigationService navigationService,
-        IThemeService themeService,
-        IDialogService dialogService)
+        INavigationService navigationService)
     {
         _apiStatusService = apiStatusService;
         _stationApiService = stationApiService;
         _playerService = playerService;
         _navigationService = navigationService;
-        _themeService = themeService;
-        _dialogService = dialogService;
 
         _playerService.StateChanged += (_, _) => RefreshPlaybackMarks();
     }
@@ -220,21 +214,9 @@ public partial class HomeViewModel : ObservableObject
         }
     }
 
-    /// <summary>Botón de tema de la cabecera: elegir entre el del sistema, claro u oscuro.</summary>
+    /// <summary>Engranaje de la cabecera.</summary>
     [RelayCommand]
-    private async Task ChangeThemeAsync()
-    {
-        var options = new Dictionary<string, ThemeChoice>
-        {
-            ["Usar el del sistema"] = ThemeChoice.System,
-            ["Claro"] = ThemeChoice.Light,
-            ["Oscuro"] = ThemeChoice.Dark
-        };
-
-        var chosen = await _dialogService.ChooseAsync("Tema de la app", [.. options.Keys]);
-        if (chosen is not null)
-            _themeService.Apply(options[chosen]);
-    }
+    private Task OpenSettingsAsync() => _navigationService.GoToSettingsAsync();
 
     [RelayCommand]
     private async Task SelectStationAsync(StationItemViewModel item)

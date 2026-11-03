@@ -110,8 +110,9 @@ public partial class FavoritesViewModel : ObservableObject
     [RelayCommand]
     private Task LoginAsync() => _navigation.GoToLoginAsync();
 
+    /// <summary>Engranaje de la cabecera (allí se cierra la sesión).</summary>
     [RelayCommand]
-    private void Logout() => _session.SignOut();
+    private Task OpenSettingsAsync() => _navigation.GoToSettingsAsync();
 
     private void UpdateSession()
     {

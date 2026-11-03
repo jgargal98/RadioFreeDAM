@@ -2,16 +2,18 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:RadioFreeDAM.ViewModels"
+             xmlns:controls="clr-namespace:RadioFreeDAM.Views.Controls"
              x:Class="RadioFreeDAM.Views.LoginPage"
              x:DataType="vm:LoginViewModel"
+             Shell.NavBarIsVisible="False"
              Title="Iniciar sesión">
-
     <ScrollView>
         <VerticalStackLayout Padding="{StaticResource LayoutPadding}" Spacing="16"
-                             MaximumWidthRequest="420" VerticalOptions="Center">
+                             MaximumWidthRequest="420">
 
             <VerticalStackLayout Spacing="4">
-                <Label Text="Iniciar sesión" Style="{StaticResource Title1}" />
+                <!-- Cabecera propia con flecha de volver (en lugar de la barra de navegación nativa) -->
+                <controls:BackHeaderView Title="Iniciar sesión" />
                 <Label Text="Entra para guardar tus emisoras favoritas." Style="{StaticResource Muted}" />
             </VerticalStackLayout>
 

@@ -6,10 +6,6 @@ public class AccentService(IPlayerService player, IStationColorService stationCo
 {
     private const string PreferenceKey = "rfd_accent";
 
-    /// <summary>Saturación y brillo fijos para la barra de tono: así cualquier tono se lee bien.</summary>
-    private const float HueSaturation = 0.65f;
-    private const float HueLuminosity = 0.48f;
-
     private string? _stationId;
     private Color? _stationColor;
     private CancellationTokenSource? _stationCts;
@@ -29,7 +25,7 @@ public class AccentService(IPlayerService player, IStationColorService stationCo
     public Color Accent => Choice.Source switch
     {
         AccentSource.Preset => Choice.Color ?? AccentPalette.DefaultAccent,
-        AccentSource.Hue => Color.FromHsla(Choice.Hue / 360, HueSaturation, HueLuminosity),
+        AccentSource.Hue => AccentPalette.FromHue(Choice.Hue),
         _ => _stationColor ?? AccentPalette.DefaultAccent
     };
 

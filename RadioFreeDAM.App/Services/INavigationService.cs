@@ -15,6 +15,9 @@ public interface INavigationService
     /// <summary>Abre Crear cuenta encima de Iniciar sesión.</summary>
     Task GoToRegisterAsync();
 
+    /// <summary>Abre Ajustes encima de la pantalla actual.</summary>
+    Task GoToSettingsAsync();
+
     /// <summary>Cierra las pantallas de cuenta y vuelve a donde estaba el usuario.</summary>
     Task CloseAccountPagesAsync();
 }

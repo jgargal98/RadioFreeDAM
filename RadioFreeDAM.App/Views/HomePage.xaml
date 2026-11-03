@@ -35,15 +35,15 @@
                 </HorizontalStackLayout>
             </Border>
 
-            <!-- Tema: sistema, claro u oscuro -->
+            <!-- Ajustes: cuenta, tema y color de acento -->
             <ImageButton Grid.RowSpan="2" Grid.Column="1"
-                         Command="{Binding ChangeThemeCommand}"
+                         Command="{Binding OpenSettingsCommand}"
                          WidthRequest="44" HeightRequest="44" Padding="10"
                          Background="Transparent"
                          VerticalOptions="Center"
-                         SemanticProperties.Description="Cambiar el tema claro u oscuro">
+                         SemanticProperties.Description="Ajustes">
                 <ImageButton.Source>
-                    <FontImageSource Glyph="{x:Static f:FluentUI.dark_theme_24_regular}"
+                    <FontImageSource Glyph="{x:Static f:FluentUI.settings_24_regular}"
                                      FontFamily="{x:Static f:FluentUI.FontFamily}"
                                      Color="{AppThemeBinding Light={StaticResource DarkOnLightBackground}, Dark={StaticResource LightOnDarkBackground}}"
                                      Size="24" />

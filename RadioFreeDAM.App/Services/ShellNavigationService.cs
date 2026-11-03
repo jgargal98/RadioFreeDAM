@@ -12,6 +12,8 @@ public class ShellNavigationService : INavigationService
 
     public Task GoToRegisterAsync() => Shell.Current.GoToAsync(Routes.Register);
 
+    public Task GoToSettingsAsync() => Shell.Current.GoToAsync(Routes.Settings);
+
     public async Task CloseAccountPagesAsync()
     {
         // Quita Iniciar sesión / Crear cuenta de la pila y deja la pantalla de debajo.
@@ -27,4 +29,6 @@ public static class Routes
     public const string Login = "login";
 
     public const string Register = "register";
+
+    public const string Settings = "settings";
 }

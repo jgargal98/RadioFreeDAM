@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Colores del tema nativo de Android en modo oscuro (mismo papel que values/colors.xml). -->
+<resources>
+    <color name="colorPrimary">#121212</color>
+    <color name="colorPrimaryDark">#121212</color>
+    <color name="colorAccent">#1ED760</color>
+</resources>

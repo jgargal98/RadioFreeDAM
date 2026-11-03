@@ -1,4 +1,4 @@
-﻿using System.Net;
+using System.Net;
 using CommunityToolkit.Maui;
 using Microsoft.Extensions.Http.Resilience;
 using Microsoft.Extensions.Logging;
@@ -79,7 +79,6 @@ namespace RadioFreeDAM
             builder.Services.AddSingleton<IThemeService, ThemeService>();
             builder.Services.AddSingleton<IStationColorService, StationColorService>();
             builder.Services.AddSingleton<IAccentService, AccentService>();
-            builder.Services.AddSingleton<IDialogService, ShellDialogService>();
 
             // ViewModels
             builder.Services.AddSingleton<HomeViewModel>();
@@ -94,6 +93,9 @@ namespace RadioFreeDAM
             // Pantallas de cuenta: se apilan encima de la pestaña actual. Nuevas cada vez (formulario vacío).
             builder.Services.AddTransientWithShellRoute<LoginPage, LoginViewModel>(Routes.Login);
             builder.Services.AddTransientWithShellRoute<RegisterPage, RegisterViewModel>(Routes.Register);
+
+            // Ajustes: una sola instancia (escucha los cambios de sesión mientras la app está abierta).
+            builder.Services.AddSingletonWithShellRoute<SettingsPage, SettingsViewModel>(Routes.Settings);
 
             return builder.Build();
         }
