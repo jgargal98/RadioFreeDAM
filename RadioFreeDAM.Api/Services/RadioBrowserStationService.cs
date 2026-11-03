@@ -7,7 +7,8 @@ namespace RadioFreeDAM.Api.Services;
 
 /// <summary>
 /// Obtiene las emisoras de Radio Browser (https://www.radio-browser.info) y las adapta a StationDto.
-/// El HttpClient ya viene configurado desde Program.cs con la URL base, el User-Agent y el timeout.
+/// El HttpClient ya viene configurado desde Program.cs con la URL base, el User-Agent, el timeout
+/// y los reintentos automáticos ante cortes momentáneos.
 /// </summary>
 public class RadioBrowserStationService(
     HttpClient httpClient,
@@ -55,7 +56,9 @@ public class RadioBrowserStationService(
         {
             stations = await httpClient.GetFromJsonAsync<List<RadioBrowserStation>>(url, cancellationToken);
         }
-        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or JsonException)
+        // ExecutionRejectedException: la política de reintentos se ha rendido (tiempo agotado o circuito abierto).
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or JsonException
+                                       or Polly.ExecutionRejectedException)
         {
             // Si quien canceló fue el propio cliente (la app cerró la conexión), no es un fallo de Radio Browser.
             if (cancellationToken.IsCancellationRequested)

@@ -1,3 +1,5 @@
+using System.IdentityModel.Tokens.Jwt;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RadioFreeDAM.Api.Services;
 using RadioFreeDAM.Shared.Dtos;
@@ -20,4 +22,13 @@ public class AuthController(AuthService authService) : ControllerBase
     [HttpPost("login")]
     public async Task<ActionResult<AuthResponse>> Login(LoginRequest request, CancellationToken cancellationToken) =>
         Ok(await authService.LoginAsync(request, cancellationToken));
+
+    // GET api/auth/me  → 200 con el usuario del token, 401 si el token no vale o el usuario ya no existe
+    [Authorize]
+    [HttpGet("me")]
+    public async Task<ActionResult<UserDto>> Me(CancellationToken cancellationToken)
+    {
+        var userId = int.Parse(User.FindFirst(JwtRegisteredClaimNames.Sub)!.Value);
+        return Ok(await authService.GetCurrentUserAsync(userId, cancellationToken));
+    }
 }

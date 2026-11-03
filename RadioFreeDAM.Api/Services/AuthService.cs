@@ -59,6 +59,17 @@ public class AuthService(
         return CreateResponse(user);
     }
 
+    /// <summary>Usuario del token. Sirve a la app para comprobar si una sesión guardada sigue valiendo.</summary>
+    public async Task<UserDto> GetCurrentUserAsync(int userId, CancellationToken cancellationToken = default)
+    {
+        var user = await users.GetByIdAsync(userId, cancellationToken)
+            ?? throw new UnauthorizedAppException("La sesión no es válida. Vuelve a iniciar sesión.");
+
+        return ToDto(user);
+    }
+
+    private static UserDto ToDto(User user) => new() { Id = user.Id, Name = user.Name, Email = user.Email };
+
     private AuthResponse CreateResponse(User user)
     {
         var (token, expiresAt) = tokenService.CreateToken(user);
@@ -66,7 +77,7 @@ public class AuthService(
         {
             Token = token,
             ExpiresAt = expiresAt,
-            User = new UserDto { Id = user.Id, Name = user.Name, Email = user.Email }
+            User = ToDto(user)
         };
     }
 

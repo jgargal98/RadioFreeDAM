@@ -88,13 +88,26 @@ builder.Services.Configure<RadioBrowserOptions>(builder.Configuration.GetSection
 builder.Services.Configure<StationCacheOptions>(builder.Configuration.GetSection(StationCacheOptions.SectionName));
 builder.Services.AddMemoryCache();
 
+var radioBrowser = builder.Configuration.GetSection(RadioBrowserOptions.SectionName).Get<RadioBrowserOptions>()
+    ?? new RadioBrowserOptions();
+
 builder.Services.AddHttpClient<RadioBrowserStationService>((serviceProvider, client) =>
-{
-    var options = serviceProvider.GetRequiredService<IOptions<RadioBrowserOptions>>().Value;
-    client.BaseAddress = new Uri(options.BaseUrl);
-    client.Timeout = TimeSpan.FromSeconds(options.TimeoutSeconds);
-    client.DefaultRequestHeaders.UserAgent.ParseAdd(options.UserAgent);
-});
+    {
+        var options = serviceProvider.GetRequiredService<IOptions<RadioBrowserOptions>>().Value;
+        client.BaseAddress = new Uri(options.BaseUrl);
+        // El tiempo máximo lo controla la política de abajo; este es solo un tope de seguridad.
+        client.Timeout = TimeSpan.FromSeconds(options.TimeoutSeconds + 5);
+        client.DefaultRequestHeaders.UserAgent.ParseAdd(options.UserAgent);
+    })
+    // Reintentos: si Radio Browser falla un momento (error de red, 5xx, tiempo agotado),
+    // se repite la petición hasta 2 veces antes de dar el error.
+    .AddStandardResilienceHandler(resilience =>
+    {
+        resilience.Retry.MaxRetryAttempts = 2;
+        resilience.Retry.Delay = TimeSpan.FromMilliseconds(500);
+        resilience.AttemptTimeout.Timeout = TimeSpan.FromSeconds(3);
+        resilience.TotalRequestTimeout.Timeout = TimeSpan.FromSeconds(radioBrowser.TimeoutSeconds);
+    });
 
 // El controlador recibe IStationService = caché que envuelve a Radio Browser.
 // Para trabajar sin Internet, sustituir RadioBrowserStationService por MockStationService aquí.
