@@ -15,4 +15,10 @@ public interface IStationService
     /// <summary>Busca emisoras de cualquier país cuyo nombre contenga <paramref name="name"/>.</summary>
     /// <exception cref="StationCatalogUnavailableException">Si el catálogo externo no responde.</exception>
     Task<IReadOnlyList<StationDto>> SearchByNameAsync(string name, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Emisoras con esos Ids (stationuuid). Las que ya no existan en el catálogo no se devuelven.
+    /// </summary>
+    /// <exception cref="StationCatalogUnavailableException">Si el catálogo externo no responde.</exception>
+    Task<IReadOnlyList<StationDto>> GetByIdsAsync(IReadOnlyCollection<string> ids, CancellationToken cancellationToken = default);
 }

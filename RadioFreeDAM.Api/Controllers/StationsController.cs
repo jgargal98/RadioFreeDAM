@@ -13,6 +13,7 @@ public class StationsController(IStationService stationService) : ControllerBase
 
     // GET api/stations            → emisoras populares
     // GET api/stations?name=jazz  → búsqueda por nombre
+    // Si Radio Browser falla, ApiExceptionHandler responde 502.
     [HttpGet]
     public async Task<ActionResult<IReadOnlyList<StationDto>>> GetStations(
         [FromQuery] string? name,
@@ -20,25 +21,12 @@ public class StationsController(IStationService stationService) : ControllerBase
     {
         var search = name?.Trim();
 
-        if (!string.IsNullOrEmpty(search) && (search.Length < MinSearchLength || search.Length > MaxSearchLength))
-        {
-            return Problem(
-                statusCode: StatusCodes.Status400BadRequest,
-                title: $"La búsqueda debe tener entre {MinSearchLength} y {MaxSearchLength} caracteres.");
-        }
+        if (string.IsNullOrEmpty(search))
+            return Ok(await stationService.GetTopStationsAsync(cancellationToken));
 
-        try
-        {
-            var stations = string.IsNullOrEmpty(search)
-                ? await stationService.GetTopStationsAsync(cancellationToken)
-                : await stationService.SearchByNameAsync(search, cancellationToken);
+        if (search.Length < MinSearchLength || search.Length > MaxSearchLength)
+            throw new ValidationFailedException($"La búsqueda debe tener entre {MinSearchLength} y {MaxSearchLength} caracteres.");
 
-            return Ok(stations);
-        }
-        catch (StationCatalogUnavailableException ex)
-        {
-            // 502: nuestra API funciona, pero el servicio externo del que depende no.
-            return Problem(statusCode: StatusCodes.Status502BadGateway, title: ex.Message);
-        }
+        return Ok(await stationService.SearchByNameAsync(search, cancellationToken));
     }
 }

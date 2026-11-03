@@ -36,6 +36,18 @@ public class RadioBrowserStationService(
         return GetStationsAsync(url, cancellationToken);
     }
 
+    public async Task<IReadOnlyList<StationDto>> GetByIdsAsync(
+        IReadOnlyCollection<string> ids,
+        CancellationToken cancellationToken = default)
+    {
+        if (ids.Count == 0)
+            return [];
+
+        // Una sola llamada para todas: byuuid acepta varios Ids separados por comas.
+        var url = $"json/stations/byuuid?uuids={Uri.EscapeDataString(string.Join(',', ids))}";
+        return await GetStationsAsync(url, cancellationToken);
+    }
+
     private async Task<IReadOnlyList<StationDto>> GetStationsAsync(string url, CancellationToken cancellationToken)
     {
         List<RadioBrowserStation>? stations;

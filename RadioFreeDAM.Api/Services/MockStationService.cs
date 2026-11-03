@@ -35,4 +35,10 @@ public class MockStationService : IStationService
 
         return Task.FromResult(result);
     }
+
+    public Task<IReadOnlyList<StationDto>> GetByIdsAsync(IReadOnlyCollection<string> ids, CancellationToken cancellationToken = default)
+    {
+        IReadOnlyList<StationDto> result = Stations.Where(s => ids.Contains(s.Id)).ToList();
+        return Task.FromResult(result);
+    }
 }
