@@ -6,13 +6,17 @@ namespace RadioFreeDAM.Services;
 /// </summary>
 public interface IStationApiService
 {
-    /// <summary>Emisoras populares (las que muestra Inicio al abrir).</summary>
+    /// <summary>Emisoras populares (las que muestra Inicio), con las cadenas agrupadas en una fila.</summary>
     /// <exception cref="HttpRequestException">
     /// Si la API no responde (StatusCode null) o devuelve un error (por ejemplo 502 si Radio Browser falla).
     /// </exception>
-    Task<IReadOnlyList<StationDto>> GetTopStationsAsync();
+    Task<IReadOnlyList<CatalogEntryDto>> GetTopStationsAsync();
 
-    /// <summary>Emisoras cuyo nombre contiene <paramref name="name"/>.</summary>
+    /// <summary>Emisoras cuyo nombre contiene <paramref name="name"/>, con las cadenas agrupadas.</summary>
     /// <exception cref="HttpRequestException">Igual que <see cref="GetTopStationsAsync"/>.</exception>
-    Task<IReadOnlyList<StationDto>> SearchAsync(string name);
+    Task<IReadOnlyList<CatalogEntryDto>> SearchAsync(string name);
+
+    /// <summary>Todas las emisoras de una cadena (por ejemplo, las COPE de cada ciudad).</summary>
+    /// <exception cref="HttpRequestException">Igual que <see cref="GetTopStationsAsync"/>.</exception>
+    Task<IReadOnlyList<StationDto>> GetNetworkStationsAsync(string networkId);
 }

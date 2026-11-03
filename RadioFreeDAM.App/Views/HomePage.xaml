@@ -107,18 +107,7 @@
 
                         <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
                             <!-- Logo de la emisora; si no tiene, la inicial sobre fondo verde -->
-                            <Grid WidthRequest="48" HeightRequest="48">
-                                <Border Style="{StaticResource StationAvatarStyle}"
-                                        IsVisible="{Binding HasFavicon, Converter={StaticResource InvertedBoolConverter}}">
-                                    <Label Text="{Binding Initial}"
-                                           TextColor="{DynamicResource OnPrimary}"
-                                           FontSize="22" FontAttributes="Bold"
-                                           HorizontalOptions="Center" VerticalOptions="Center" />
-                                </Border>
-                                <Border Style="{StaticResource StationLogoStyle}" IsVisible="{Binding HasFavicon}">
-                                    <Image Source="{Binding FaviconUrl}" Aspect="AspectFit" />
-                                </Border>
-                            </Grid>
+                            <controls:StationLogoView WidthRequest="48" HeightRequest="48" Source="{Binding FaviconUrl}" Initial="{Binding Initial}" />
 
                             <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
                                 <Label Text="{Binding Name}" Style="{StaticResource Body1Strong}" LineBreakMode="TailTruncation" />

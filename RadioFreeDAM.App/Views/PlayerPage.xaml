@@ -42,19 +42,7 @@
                 <controls:SoundWavesView WaveColor="{Binding WaveColor}" IsAnimating="{Binding IsPlaying}" />
 
             <!-- Logo de la emisora; si no tiene, la inicial sobre fondo verde -->
-            <Grid WidthRequest="180" HeightRequest="180" HorizontalOptions="Center" VerticalOptions="Center">
-                <Border Style="{StaticResource StationAvatarStyle}" StrokeShape="RoundRectangle 28"
-                        IsVisible="{Binding HasFavicon, Converter={StaticResource InvertedBoolConverter}}">
-                    <Label Text="{Binding StationInitial}"
-                           TextColor="{DynamicResource OnPrimary}"
-                           FontSize="84" FontAttributes="Bold"
-                           HorizontalOptions="Center" VerticalOptions="Center" />
-                </Border>
-                <Border Style="{StaticResource StationLogoStyle}" StrokeShape="RoundRectangle 28" Padding="16"
-                        IsVisible="{Binding HasFavicon}">
-                    <Image Source="{Binding CurrentStation.FaviconUrl}" Aspect="AspectFit" />
-                </Border>
-            </Grid>
+            <controls:StationLogoView WidthRequest="180" HeightRequest="180" HorizontalOptions="Center" VerticalOptions="Center" Source="{Binding CurrentStation.FaviconUrl}" Initial="{Binding StationInitial}" CornerRadius="28" InitialFontSize="84" LogoPadding="16" />
             </Grid>
 
             <VerticalStackLayout Spacing="4">

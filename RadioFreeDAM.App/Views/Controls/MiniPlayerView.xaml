@@ -7,6 +7,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:f="clr-namespace:Fonts"
              xmlns:vm="clr-namespace:RadioFreeDAM.ViewModels"
+             xmlns:controls="clr-namespace:RadioFreeDAM.Views.Controls"
              x:Class="RadioFreeDAM.Views.Controls.MiniPlayerView"
              x:DataType="vm:PlayerViewModel"
              IsVisible="{Binding HasStation}">
@@ -25,18 +26,7 @@
 
         <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
             <!-- Logo o inicial -->
-            <Grid WidthRequest="44" HeightRequest="44">
-                <Border Style="{StaticResource StationAvatarStyle}"
-                        IsVisible="{Binding HasFavicon, Converter={StaticResource InvertedBoolConverter}}">
-                    <Label Text="{Binding StationInitial}"
-                           TextColor="{DynamicResource OnPrimary}"
-                           FontSize="20" FontAttributes="Bold"
-                           HorizontalOptions="Center" VerticalOptions="Center" />
-                </Border>
-                <Border Style="{StaticResource StationLogoStyle}" IsVisible="{Binding HasFavicon}">
-                    <Image Source="{Binding CurrentStation.FaviconUrl}" Aspect="AspectFit" />
-                </Border>
-            </Grid>
+            <controls:StationLogoView WidthRequest="44" HeightRequest="44" Source="{Binding CurrentStation.FaviconUrl}" Initial="{Binding StationInitial}" InitialFontSize="20" />
 
             <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
                 <Label Text="{Binding CurrentStation.Name}" Style="{StaticResource Body1Strong}" LineBreakMode="TailTruncation" />

@@ -1,5 +1,4 @@
 using System.Collections.ObjectModel;
-using System.Net;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
@@ -162,7 +161,7 @@ public partial class HomeViewModel : ObservableObject
     /// Carga una lista de emisoras. Si mientras tanto empieza otra carga (el usuario sigue escribiendo),
     /// el resultado de esta se descarta: siempre se muestra la última búsqueda.
     /// </summary>
-    private async Task LoadStationsAsync(Func<Task<IReadOnlyList<StationDto>>> fetch, string? search, string title)
+    private async Task LoadStationsAsync(Func<Task<IReadOnlyList<CatalogEntryDto>>> fetch, string? search, string title)
     {
         var request = ++_requestVersion;
         IsLoading = true;
@@ -171,7 +170,7 @@ public partial class HomeViewModel : ObservableObject
 
         try
         {
-            var stations = await fetch();
+            var entries = await fetch();
             if (request != _requestVersion)
                 return;
 
@@ -179,8 +178,8 @@ public partial class HomeViewModel : ObservableObject
             _activeSearch = search;
             ListTitle = title;
             Stations.Clear();
-            foreach (var station in stations)
-                Stations.Add(new StationItemViewModel(station));
+            foreach (var entry in entries)
+                Stations.Add(new StationItemViewModel(entry));
 
             EmptyMessage = search is null
                 ? "La API no ha devuelto ninguna emisora."
@@ -190,22 +189,9 @@ public partial class HomeViewModel : ObservableObject
         }
         catch (Exception ex) when (request == _requestVersion && ApiException.IsCommunicationError(ex))
         {
-            ErrorMessage = ex switch
-            {
-                // No hay respuesta: la API está apagada o no es alcanzable.
-                HttpRequestException { StatusCode: null } or Polly.CircuitBreaker.BrokenCircuitException =>
-                    $"No se puede conectar con la API en {ApiConfig.BaseUrl}. Comprueba que está arrancada.",
-                // La API responde, pero Radio Browser no.
-                HttpRequestException { StatusCode: HttpStatusCode.BadGateway } =>
-                    "El catálogo de emisoras (Radio Browser) no está disponible ahora mismo. Inténtalo de nuevo en unos minutos.",
-                HttpRequestException =>
-                    "No se ha podido cargar el catálogo de emisoras. Inténtalo de nuevo.",
-                _ => ApiException.ToUserMessage(ex)
-            };
-
-            IsServerOnline = ex is HttpRequestException { StatusCode: null } or Polly.CircuitBreaker.BrokenCircuitException
-                ? false
-                : IsServerOnline;
+            ErrorMessage = ApiException.ToCatalogMessage(ex);
+            if (ApiException.IsConnectionFailure(ex))
+                IsServerOnline = false;
         }
         finally
         {
@@ -221,7 +207,14 @@ public partial class HomeViewModel : ObservableObject
     [RelayCommand]
     private async Task SelectStationAsync(StationItemViewModel item)
     {
-        _playerService.Select(item.Station);
+        // Una cadena abre la lista de sus emisoras para elegir ciudad; una emisora va al Reproductor.
+        if (item.Network is { } network)
+        {
+            await _navigationService.GoToNetworkAsync(network);
+            return;
+        }
+
+        _playerService.Select(item.Station!);
         await _navigationService.GoToPlayerAsync();
     }
 
@@ -230,7 +223,7 @@ public partial class HomeViewModel : ObservableObject
         var current = _playerService.CurrentStation;
         foreach (var item in Stations)
         {
-            item.IsSelected = item.Station.Id == current?.Id;
+            item.IsSelected = item.Represents(current);
             item.IsPlaying = item.IsSelected && _playerService.State == PlaybackState.Playing;
         }
     }

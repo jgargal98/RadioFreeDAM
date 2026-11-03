@@ -14,6 +14,10 @@ public class ShellNavigationService : INavigationService
 
     public Task GoToSettingsAsync() => Shell.Current.GoToAsync(Routes.Settings);
 
+    // La cadena se pasa como parámetro de navegación; NetworkViewModel la recibe en ApplyQueryAttributes.
+    public Task GoToNetworkAsync(NetworkDto network) =>
+        Shell.Current.GoToAsync(Routes.Network, new Dictionary<string, object> { ["network"] = network });
+
     public async Task CloseAccountPagesAsync()
     {
         // Quita Iniciar sesión / Crear cuenta de la pila y deja la pantalla de debajo.
@@ -31,4 +35,6 @@ public static class Routes
     public const string Register = "register";
 
     public const string Settings = "settings";
+
+    public const string Network = "network";
 }

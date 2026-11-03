@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:RadioFreeDAM.ViewModels"
+             xmlns:controls="clr-namespace:RadioFreeDAM.Views.Controls"
+             x:Class="RadioFreeDAM.Views.NetworkPage"
+             x:DataType="vm:NetworkViewModel"
+             Shell.NavBarIsVisible="False"
+             Title="{Binding Title}">
+
+    <Grid RowDefinitions="*,Auto">
+        <Grid RowDefinitions="Auto,Auto,Auto,*"
+              Padding="{StaticResource LayoutPadding}"
+              RowSpacing="{StaticResource LayoutSpacing}">
+
+            <!-- Cabecera: nombre de la cadena con flecha de volver -->
+            <controls:BackHeaderView Title="{Binding Title}" />
+
+            <Label Grid.Row="1" Text="Elige la emisora de tu ciudad" Style="{StaticResource Muted}" />
+
+            <Border Grid.Row="2" Style="{StaticResource CardStyle}" IsVisible="{Binding HasError}">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="{Binding ErrorMessage}" Style="{StaticResource ErrorText}" />
+                    <Button Text="Reintentar" Style="{StaticResource OutlineButton}" HorizontalOptions="Start"
+                            Command="{Binding LoadCommand}" />
+                </VerticalStackLayout>
+            </Border>
+
+            <CollectionView Grid.Row="3" ItemsSource="{Binding Stations}" SelectionMode="None">
+                <CollectionView.ItemsLayout>
+                    <LinearItemsLayout Orientation="Vertical" ItemSpacing="8" />
+                </CollectionView.ItemsLayout>
+
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="vm:StationItemViewModel">
+                        <Border Style="{StaticResource CardStyle}" SemanticProperties.Description="{Binding Name}">
+                            <Border.Triggers>
+                                <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
+                                    <Setter Property="StrokeThickness" Value="2" />
+                                    <Setter Property="Stroke" Value="{DynamicResource Primary}" />
+                                    <Setter Property="Background" Value="{DynamicResource PrimarySoft}" />
+                                </DataTrigger>
+                            </Border.Triggers>
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer
+                                    Command="{Binding SelectStationCommand, Source={RelativeSource AncestorType={x:Type vm:NetworkViewModel}}, x:DataType=vm:NetworkViewModel}"
+                                    CommandParameter="{Binding .}" />
+                            </Border.GestureRecognizers>
+
+                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                                <controls:StationLogoView WidthRequest="48" HeightRequest="48" Source="{Binding FaviconUrl}" Initial="{Binding Initial}" />
+
+                                <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
+                                    <Label Text="{Binding Name}" Style="{StaticResource Body1Strong}" LineBreakMode="TailTruncation" />
+                                    <Label Text="{Binding Subtitle}" Style="{StaticResource Muted}" LineBreakMode="TailTruncation" />
+                                </VerticalStackLayout>
+
+                                <Label Grid.Column="2" Text="Sonando" IsVisible="{Binding IsPlaying}"
+                                       FontSize="13" FontAttributes="Bold" TextColor="{DynamicResource PrimaryText}"
+                                       VerticalOptions="Center" />
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <ActivityIndicator Grid.Row="3" IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}"
+                               HorizontalOptions="Center" VerticalOptions="Center" />
+        </Grid>
+
+        <!-- Mini reproductor (su BindingContext lo pone el código de la página) -->
+        <controls:MiniPlayerView x:Name="MiniPlayer" Grid.Row="1" />
+    </Grid>
+</ContentPage>

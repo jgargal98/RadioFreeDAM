@@ -15,6 +15,9 @@ public interface INavigationService
     /// <summary>Abre Crear cuenta encima de Iniciar sesión.</summary>
     Task GoToRegisterAsync();
 
+    /// <summary>Abre la lista de emisoras de una cadena (para elegir ciudad).</summary>
+    Task GoToNetworkAsync(NetworkDto network);
+
     /// <summary>Abre Ajustes encima de la pantalla actual.</summary>
     Task GoToSettingsAsync();
 

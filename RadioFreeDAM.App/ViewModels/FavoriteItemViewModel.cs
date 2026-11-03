@@ -20,8 +20,6 @@ public partial class FavoriteItemViewModel(FavoriteDto favorite) : ObservableObj
 
     public string? FaviconUrl => Favorite.Station?.FaviconUrl;
 
-    public bool HasFavicon => !string.IsNullOrWhiteSpace(FaviconUrl);
-
     public string Initial => string.IsNullOrWhiteSpace(Favorite.Station?.Name) ? "?" : Favorite.Station.Name[..1].ToUpperInvariant();
 
     [ObservableProperty]

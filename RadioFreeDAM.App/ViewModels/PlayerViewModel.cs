@@ -100,12 +100,10 @@ public partial class PlayerViewModel : ObservableObject
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasStation), nameof(StationInitial), nameof(StationSubtitle),
-        nameof(StationQuality), nameof(HasFavicon))]
+        nameof(StationQuality))]
     public partial StationDto? CurrentStation { get; set; }
 
     public bool HasStation => CurrentStation is not null;
-
-    public bool HasFavicon => !string.IsNullOrWhiteSpace(CurrentStation?.FaviconUrl);
 
     public string StationInitial => string.IsNullOrWhiteSpace(CurrentStation?.Name)
         ? "?"

@@ -97,6 +97,9 @@ namespace RadioFreeDAM
             // Ajustes: una sola instancia (escucha los cambios de sesión mientras la app está abierta).
             builder.Services.AddSingletonWithShellRoute<SettingsPage, SettingsViewModel>(Routes.Settings);
 
+            // Emisoras de una cadena: una sola instancia; cada vez que se abre recibe la cadena y recarga.
+            builder.Services.AddSingletonWithShellRoute<NetworkPage, NetworkViewModel>(Routes.Network);
+
             return builder.Build();
         }
     }

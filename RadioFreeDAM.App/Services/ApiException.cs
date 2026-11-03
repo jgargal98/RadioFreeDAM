@@ -43,6 +43,23 @@ public class ApiException(string message, HttpStatusCode statusCode) : Exception
     public static bool IsCommunicationError(Exception ex) =>
         ex is ApiException or HttpRequestException or TaskCanceledException or Polly.ExecutionRejectedException;
 
+    /// <summary>No hay respuesta de la API: está apagada o no es alcanzable.</summary>
+    public static bool IsConnectionFailure(Exception ex) =>
+        ex is HttpRequestException { StatusCode: null } or Polly.CircuitBreaker.BrokenCircuitException;
+
+    /// <summary>Mensaje para el usuario cuando falla la carga del catálogo de emisoras.</summary>
+    public static string ToCatalogMessage(Exception ex) => ex switch
+    {
+        _ when IsConnectionFailure(ex) =>
+            $"No se puede conectar con la API en {ApiConfig.BaseUrl}. Comprueba que está arrancada.",
+        // La API responde, pero Radio Browser no.
+        HttpRequestException { StatusCode: HttpStatusCode.BadGateway } =>
+            "El catálogo de emisoras (Radio Browser) no está disponible ahora mismo. Inténtalo de nuevo en unos minutos.",
+        HttpRequestException =>
+            "No se ha podido cargar el catálogo de emisoras. Inténtalo de nuevo.",
+        _ => ToUserMessage(ex)
+    };
+
     /// <summary>Mensaje para el usuario según el tipo de error.</summary>
     public static string ToUserMessage(Exception ex) => ex switch
     {
