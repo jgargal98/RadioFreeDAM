@@ -21,7 +21,7 @@ App MAUI ──HTTP/JSON──▶ API ASP.NET Core ──▶ Radio Browser      
 
 ### App (MVVM)
 
-- `Views/`: páginas XAML (Inicio, Reproductor, Favoritos, Iniciar sesión, Crear cuenta) y el control `MiniPlayerView`. Solo presentación.
+- `Views/`: páginas XAML (Inicio, Reproductor, Favoritos, Ajustes, Iniciar sesión, Crear cuenta) y los controles `MiniPlayerView`, `SoundWavesView` y `BackHeaderView`. Solo presentación.
 - `ViewModels/`: estado y comandos de cada pantalla.
 - `Services/`:
   - Comunicación con la API: `StationApiService`, `ApiStatusService`, `AuthApiService`, `FavoritesApiService`.
@@ -43,10 +43,11 @@ App MAUI ──HTTP/JSON──▶ API ASP.NET Core ──▶ Radio Browser      
 
 ### Diseño
 
-- Tema **claro y oscuro**: sigue al sistema o se elige en la app (botón de la cabecera de Inicio); la elección se recuerda.
-- Color de acento verde; icono y pantalla de carga con una radio clásica.
-- **Reproductor**: el fondo toma el color dominante del logo de la emisora (`StationColorService`, con SkiaSharp), suavizado para que el texto se lea en ambos temas. Sin logo, el verde de la app.
-- **Ondas de sonido** de fondo (`SoundWavesView`, dibujadas con `GraphicsView`): se mueven mientras suena y se aplanan al detener. Son decorativas: MediaElement no da acceso al volumen real.
+- **Ajustes** (engranaje en Inicio y Favoritos): cuenta (iniciar o cerrar sesión), tema y color de acento.
+- Tema **claro y oscuro**: sigue al sistema o se elige en Ajustes; la elección se recuerda.
+- **Color de acento** (`AccentService`): por defecto, el color del logo de la emisora que suena (`StationColorService`, con SkiaSharp); también 6 colores fijos o cualquier tono con una barra deslizante. Se publica como recursos dinámicos (`Primary`, `OnPrimary`, `PrimaryText`, `PrimarySoft`) y `AccentPalette` lo adapta a cada tema para que siempre se lea bien (por ejemplo, elige texto negro o blanco encima del color según el contraste).
+- **Reproductor**: fondo con el color de acento suavizado y **ondas de sonido** (`SoundWavesView`, dibujadas con `GraphicsView`) que se mueven mientras suena. Son decorativas: MediaElement no da acceso al volumen real.
+- Icono y pantalla de carga con una radio clásica.
 
 ## Base de datos
 
