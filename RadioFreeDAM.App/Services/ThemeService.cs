@@ -12,6 +12,10 @@ public class ThemeService : IThemeService
 
     public void ApplySaved()
     {
+        // Tanto si cambia la elección en la app como el tema del sistema, los iconos de la barra de estado se adaptan.
+        if (Application.Current is { } app)
+            app.RequestedThemeChanged += (_, _) => UpdateStatusBar();
+
         var saved = Preferences.Default.Get(PreferenceKey, nameof(ThemeChoice.System));
         Apply(Enum.TryParse<ThemeChoice>(saved, out var choice) ? choice : ThemeChoice.System);
     }
@@ -30,5 +34,22 @@ public class ThemeService : IThemeService
                 _ => AppTheme.Unspecified
             };
         }
+    }
+
+    /// <summary>Iconos de la barra de estado oscuros en tema claro y claros en tema oscuro.</summary>
+    private static void UpdateStatusBar()
+    {
+#if ANDROID || IOS
+        try
+        {
+            var isDark = Application.Current?.RequestedTheme == AppTheme.Dark;
+            CommunityToolkit.Maui.Core.Platform.StatusBar.SetStyle(
+                isDark ? CommunityToolkit.Maui.Core.StatusBarStyle.LightContent : CommunityToolkit.Maui.Core.StatusBarStyle.DarkContent);
+        }
+        catch (Exception)
+        {
+            // Si la ventana todavía no existe, ya lo aplicará StatusBarBehavior al mostrarse.
+        }
+#endif
     }
 }

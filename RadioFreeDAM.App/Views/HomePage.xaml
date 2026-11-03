@@ -93,7 +93,10 @@
                             SemanticProperties.Description="{Binding Name}">
                         <Border.Triggers>
                             <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
-                                <Setter Property="Style" Value="{StaticResource SelectedCardStyle}" />
+                                <!-- Se cambian propiedades sueltas (no el Style entero): así se restauran bien al deseleccionar -->
+                                <Setter Property="StrokeThickness" Value="2" />
+                                <Setter Property="Stroke" Value="{StaticResource Primary}" />
+                                <Setter Property="Background" Value="{AppThemeBinding Light={StaticResource PrimarySoftLight}, Dark={StaticResource PrimarySoftDark}}" />
                             </DataTrigger>
                         </Border.Triggers>
                         <Border.GestureRecognizers>

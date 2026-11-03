@@ -115,16 +115,6 @@
                 Value="{AppThemeBinding Light={StaticResource LightSecondaryBackground}, Dark={StaticResource DarkSecondaryBackground}}" />
     </Style>
 
-    <!-- Tarjeta de la emisora seleccionada: fondo verde suave y borde verde -->
-    <Style x:Key="SelectedCardStyle"
-           TargetType="Border"
-           BasedOn="{StaticResource CardStyle}">
-        <Setter Property="StrokeThickness" Value="2" />
-        <Setter Property="Stroke" Value="{StaticResource Primary}" />
-        <Setter Property="Background"
-                Value="{AppThemeBinding Light={StaticResource PrimarySoftLight}, Dark={StaticResource PrimarySoftDark}}" />
-    </Style>
-
     <!-- Avatar cuadrado con la inicial de la emisora -->
     <Style x:Key="StationAvatarStyle"
            TargetType="Border">
