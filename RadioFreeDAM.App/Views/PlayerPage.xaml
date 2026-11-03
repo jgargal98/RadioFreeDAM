@@ -90,6 +90,38 @@
                 </ImageButton.Triggers>
             </ImageButton>
 
+            <!-- Favorita: sin sesión lleva a Iniciar sesión; verde cuando ya está guardada -->
+            <VerticalStackLayout Spacing="6" HorizontalOptions="Center">
+                <Button Text="{Binding FavoriteButtonText}"
+                        Command="{Binding ToggleFavoriteCommand}"
+                        Style="{StaticResource OutlineButton}"
+                        HorizontalOptions="Center"
+                        SemanticProperties.Hint="Añade o quita esta emisora de tus favoritas">
+                    <Button.ImageSource>
+                        <FontImageSource Glyph="{x:Static f:FluentUI.heart_24_regular}"
+                                         FontFamily="{x:Static f:FluentUI.FontFamily}"
+                                         Color="{AppThemeBinding Light={StaticResource PrimaryTextLight}, Dark={StaticResource PrimaryTextDark}}"
+                                         Size="20" />
+                    </Button.ImageSource>
+                    <Button.Triggers>
+                        <DataTrigger TargetType="Button" Binding="{Binding IsFavorite}" Value="True">
+                            <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
+                            <Setter Property="TextColor" Value="{StaticResource OnPrimary}" />
+                            <Setter Property="ImageSource">
+                                <FontImageSource Glyph="{x:Static f:FluentUI.heart_24_regular}"
+                                                 FontFamily="{x:Static f:FluentUI.FontFamily}"
+                                                 Color="{StaticResource OnPrimary}" Size="20" />
+                            </Setter>
+                        </DataTrigger>
+                        <DataTrigger TargetType="Button" Binding="{Binding IsFavoriteBusy}" Value="True">
+                            <Setter Property="IsEnabled" Value="False" />
+                        </DataTrigger>
+                    </Button.Triggers>
+                </Button>
+                <Label Text="{Binding FavoriteErrorMessage}" IsVisible="{Binding HasFavoriteError}"
+                       Style="{StaticResource ErrorText}" HorizontalTextAlignment="Center" />
+            </VerticalStackLayout>
+
             <!-- Error de audio: el botón de reproducir sirve para reintentar -->
             <Border Style="{StaticResource CardStyle}" IsVisible="{Binding HasError}">
                 <VerticalStackLayout Spacing="4">

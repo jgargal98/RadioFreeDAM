@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:RadioFreeDAM.ViewModels"
+             x:Class="RadioFreeDAM.Views.LoginPage"
+             x:DataType="vm:LoginViewModel"
+             Title="Iniciar sesión">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="{StaticResource LayoutPadding}" Spacing="16"
+                             MaximumWidthRequest="420" VerticalOptions="Center">
+
+            <VerticalStackLayout Spacing="4">
+                <Label Text="Iniciar sesión" Style="{StaticResource Title1}" />
+                <Label Text="Entra para guardar tus emisoras favoritas." Style="{StaticResource Muted}" />
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Spacing="6">
+                <Label Text="Correo" Style="{StaticResource Body1Strong}" />
+                <Entry Text="{Binding Email}" Keyboard="Email" Placeholder="tu@correo.com"
+                       IsSpellCheckEnabled="False" IsTextPredictionEnabled="False" />
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Spacing="6">
+                <Label Text="Contraseña" Style="{StaticResource Body1Strong}" />
+                <Entry Text="{Binding Password}" IsPassword="True" Placeholder="Tu contraseña"
+                       ReturnCommand="{Binding LoginCommand}" />
+            </VerticalStackLayout>
+
+            <Border Style="{StaticResource CardStyle}" IsVisible="{Binding HasError}">
+                <Label Text="{Binding ErrorMessage}" Style="{StaticResource ErrorText}" />
+            </Border>
+
+            <Grid>
+                <Button Text="Entrar" Command="{Binding LoginCommand}"
+                        IsEnabled="{Binding IsBusy, Converter={StaticResource InvertedBoolConverter}}" />
+                <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}"
+                                   WidthRequest="24" HeightRequest="24" Color="{StaticResource OnPrimary}" />
+            </Grid>
+
+            <Button Text="¿No tienes cuenta? Crear cuenta"
+                    Style="{StaticResource OutlineButton}"
+                    Command="{Binding GoToRegisterCommand}" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

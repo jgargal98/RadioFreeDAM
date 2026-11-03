@@ -10,14 +10,78 @@ public partial class PlayerViewModel : ObservableObject
 {
     private readonly IPlayerService _playerService;
     private readonly INavigationService _navigationService;
+    private readonly ISessionService _session;
+    private readonly IFavoritesService _favorites;
 
-    public PlayerViewModel(IPlayerService playerService, INavigationService navigationService)
+    public PlayerViewModel(
+        IPlayerService playerService,
+        INavigationService navigationService,
+        ISessionService session,
+        IFavoritesService favorites)
     {
         _playerService = playerService;
         _navigationService = navigationService;
+        _session = session;
+        _favorites = favorites;
 
         _playerService.StateChanged += (_, _) => UpdateFromPlayer();
+        _favorites.FavoritesChanged += (_, _) => UpdateFavorite();
+        _session.SessionChanged += (_, _) => UpdateFavorite();
         UpdateFromPlayer();
+    }
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(FavoriteButtonText))]
+    public partial bool IsFavorite { get; set; }
+
+    public string FavoriteButtonText => IsFavorite ? "En favoritas" : "Añadir a favoritas";
+
+    [ObservableProperty]
+    public partial bool IsFavoriteBusy { get; set; }
+
+    /// <summary>Error al guardar o quitar la favorita (se muestra bajo el botón).</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasFavoriteError))]
+    public partial string? FavoriteErrorMessage { get; set; }
+
+    public bool HasFavoriteError => !string.IsNullOrEmpty(FavoriteErrorMessage);
+
+    /// <summary>Corazón: sin sesión lleva a Iniciar sesión; con sesión añade o quita la favorita.</summary>
+    [RelayCommand]
+    private async Task ToggleFavoriteAsync()
+    {
+        if (CurrentStation is null || IsFavoriteBusy)
+            return;
+
+        FavoriteErrorMessage = null;
+
+        if (!_session.IsLoggedIn)
+        {
+            await _navigationService.GoToLoginAsync();
+            return;
+        }
+
+        IsFavoriteBusy = true;
+        try
+        {
+            if (_favorites.IsFavorite(CurrentStation.Id))
+                await _favorites.RemoveAsync(CurrentStation.Id);
+            else
+                await _favorites.AddAsync(CurrentStation);
+        }
+        catch (Exception ex) when (ex is ApiException or HttpRequestException or TaskCanceledException)
+        {
+            FavoriteErrorMessage = ApiException.ToUserMessage(ex);
+        }
+        finally
+        {
+            IsFavoriteBusy = false;
+        }
+    }
+
+    private void UpdateFavorite()
+    {
+        IsFavorite = CurrentStation is not null && _favorites.IsFavorite(CurrentStation.Id);
     }
 
     [ObservableProperty]
@@ -95,8 +159,12 @@ public partial class PlayerViewModel : ObservableObject
 
     private void UpdateFromPlayer()
     {
+        if (CurrentStation?.Id != _playerService.CurrentStation?.Id)
+            FavoriteErrorMessage = null;
+
         CurrentStation = _playerService.CurrentStation;
         State = _playerService.State;
         ErrorMessage = _playerService.ErrorMessage;
+        UpdateFavorite();
     }
 }

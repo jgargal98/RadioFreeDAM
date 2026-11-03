@@ -50,16 +50,24 @@ namespace RadioFreeDAM
             builder.Services.AddSingleton<MediaElementPlayerService>();
             builder.Services.AddSingleton<IPlayerService>(sp => sp.GetRequiredService<MediaElementPlayerService>());
             builder.Services.AddSingleton<INavigationService, ShellNavigationService>();
+            builder.Services.AddSingleton<IAuthApiService, AuthApiService>();
+            builder.Services.AddSingleton<IFavoritesApiService, FavoritesApiService>();
+            builder.Services.AddSingleton<ISessionService, SessionService>();
+            builder.Services.AddSingleton<IFavoritesService, FavoritesService>();
 
             // ViewModels
             builder.Services.AddSingleton<HomeViewModel>();
             builder.Services.AddSingleton<PlayerViewModel>();
             builder.Services.AddSingleton<FavoritesViewModel>();
 
-            // Views
+            // Views (pestañas)
             builder.Services.AddSingleton<HomePage>();
             builder.Services.AddSingleton<PlayerPage>();
             builder.Services.AddSingleton<FavoritesPage>();
+
+            // Pantallas de cuenta: se apilan encima de la pestaña actual. Nuevas cada vez (formulario vacío).
+            builder.Services.AddTransientWithShellRoute<LoginPage, LoginViewModel>(Routes.Login);
+            builder.Services.AddTransientWithShellRoute<RegisterPage, RegisterViewModel>(Routes.Register);
 
             return builder.Build();
         }

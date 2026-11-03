@@ -8,4 +8,13 @@ public interface INavigationService
     Task GoToHomeAsync();
 
     Task GoToPlayerAsync();
+
+    /// <summary>Abre Iniciar sesión encima de la pantalla actual.</summary>
+    Task GoToLoginAsync();
+
+    /// <summary>Abre Crear cuenta encima de Iniciar sesión.</summary>
+    Task GoToRegisterAsync();
+
+    /// <summary>Cierra las pantallas de cuenta y vuelve a donde estaba el usuario.</summary>
+    Task CloseAccountPagesAsync();
 }

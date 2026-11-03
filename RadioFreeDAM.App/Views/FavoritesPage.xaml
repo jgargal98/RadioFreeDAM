@@ -1,40 +1,116 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:dto="clr-namespace:RadioFreeDAM.Shared.Dtos;assembly=RadioFreeDAM.Shared"
+             xmlns:f="clr-namespace:Fonts"
              xmlns:vm="clr-namespace:RadioFreeDAM.ViewModels"
              x:Class="RadioFreeDAM.Views.FavoritesPage"
              x:DataType="vm:FavoritesViewModel"
              Title="Favoritos">
 
-    <Grid RowDefinitions="Auto,*"
-          Padding="{StaticResource LayoutPadding}"
-          RowSpacing="{StaticResource LayoutSpacing}">
+    <Grid>
+        <!-- Sin sesión: invitación a iniciarla -->
+        <VerticalStackLayout IsVisible="{Binding IsLoggedOut}"
+                             VerticalOptions="Center" HorizontalOptions="Center"
+                             Padding="{StaticResource LayoutPadding}"
+                             Spacing="12" MaximumWidthRequest="360">
+            <Image Source="{StaticResource IconFavorites}" WidthRequest="48" HeightRequest="48" />
+            <Label Text="Guarda tus emisoras favoritas" Style="{StaticResource Title2}" HorizontalTextAlignment="Center" />
+            <Label Text="Inicia sesión para guardarlas y recuperarlas cuando vuelvas a abrir la app."
+                   Style="{StaticResource Muted}" HorizontalTextAlignment="Center" />
+            <Button Text="Iniciar sesión" Command="{Binding LoginCommand}" HorizontalOptions="Center" />
+        </VerticalStackLayout>
 
-        <Label Text="Favoritos" Style="{StaticResource Title1}" />
+        <!-- Con sesión: lista de favoritas -->
+        <Grid IsVisible="{Binding IsLoggedIn}"
+              RowDefinitions="Auto,Auto,*"
+              Padding="{StaticResource LayoutPadding}"
+              RowSpacing="{StaticResource LayoutSpacing}">
 
-        <!-- Preparado para la Fase 3: la lista se rellenará desde la API tras iniciar sesión -->
-        <CollectionView Grid.Row="1" ItemsSource="{Binding Favorites}" SelectionMode="None">
-            <CollectionView.EmptyView>
-                <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center"
-                                     Spacing="12" MaximumWidthRequest="360">
-                    <Image Source="{StaticResource IconFavorites}" WidthRequest="48" HeightRequest="48" />
-                    <Label Text="Aún no tienes favoritas" Style="{StaticResource Title2}" HorizontalTextAlignment="Center" />
-                    <Label Text="Cuando inicies sesión podrás guardar tus emisoras favoritas y recuperarlas en cualquier momento."
-                           Style="{StaticResource Muted}" HorizontalTextAlignment="Center" />
+            <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto" RowSpacing="2">
+                <Label Text="Favoritos" Style="{StaticResource Title1}" />
+                <Label Grid.Row="1" Text="{Binding UserText}" Style="{StaticResource Muted}" LineBreakMode="TailTruncation" />
+                <Button Grid.RowSpan="2" Grid.Column="1" Text="Cerrar sesión"
+                        Style="{StaticResource OutlineButton}" VerticalOptions="Center"
+                        Command="{Binding LogoutCommand}" />
+            </Grid>
+
+            <Border Grid.Row="1" Style="{StaticResource CardStyle}" IsVisible="{Binding HasError}">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="{Binding ErrorMessage}" Style="{StaticResource ErrorText}" />
+                    <Button Text="Reintentar" Style="{StaticResource OutlineButton}" HorizontalOptions="Start"
+                            Command="{Binding LoadCommand}" />
                 </VerticalStackLayout>
-            </CollectionView.EmptyView>
+            </Border>
 
-            <CollectionView.ItemTemplate>
-                <DataTemplate x:DataType="dto:StationDto">
-                    <Border Style="{StaticResource CardStyle}" Margin="0,0,0,8">
-                        <VerticalStackLayout Spacing="2">
-                            <Label Text="{Binding Name}" Style="{StaticResource Body1Strong}" />
-                            <Label Text="{Binding Country}" Style="{StaticResource Muted}" />
+            <RefreshView Grid.Row="2" Command="{Binding LoadCommand}" IsRefreshing="{Binding IsLoading}">
+                <CollectionView ItemsSource="{Binding Items}" SelectionMode="None">
+                    <CollectionView.ItemsLayout>
+                        <LinearItemsLayout Orientation="Vertical" ItemSpacing="8" />
+                    </CollectionView.ItemsLayout>
+
+                    <CollectionView.EmptyView>
+                        <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center"
+                                             Spacing="12" MaximumWidthRequest="360" Padding="0,40">
+                            <Label Text="Aún no tienes favoritas" Style="{StaticResource Title2}" HorizontalTextAlignment="Center" />
+                            <Label Text="Abre una emisora en el Reproductor y pulsa «Añadir a favoritas»."
+                                   Style="{StaticResource Muted}" HorizontalTextAlignment="Center" />
                         </VerticalStackLayout>
-                    </Border>
-                </DataTemplate>
-            </CollectionView.ItemTemplate>
-        </CollectionView>
+                    </CollectionView.EmptyView>
+
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="vm:FavoriteItemViewModel">
+                            <Border Style="{StaticResource CardStyle}" SemanticProperties.Description="{Binding Name}">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer
+                                        Command="{Binding PlayCommand, Source={RelativeSource AncestorType={x:Type vm:FavoritesViewModel}}, x:DataType=vm:FavoritesViewModel}"
+                                        CommandParameter="{Binding .}" />
+                                </Border.GestureRecognizers>
+
+                                <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="12">
+                                    <Grid WidthRequest="48" HeightRequest="48">
+                                        <Border Style="{StaticResource StationAvatarStyle}"
+                                                IsVisible="{Binding HasFavicon, Converter={StaticResource InvertedBoolConverter}}">
+                                            <Label Text="{Binding Initial}"
+                                                   TextColor="{StaticResource OnPrimary}"
+                                                   FontSize="22" FontAttributes="Bold"
+                                                   HorizontalOptions="Center" VerticalOptions="Center" />
+                                        </Border>
+                                        <Border Style="{StaticResource StationLogoStyle}" IsVisible="{Binding HasFavicon}">
+                                            <Image Source="{Binding FaviconUrl}" Aspect="AspectFit" />
+                                        </Border>
+                                    </Grid>
+
+                                    <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
+                                        <Label Text="{Binding Name}" Style="{StaticResource Body1Strong}" LineBreakMode="TailTruncation" />
+                                        <Label Text="{Binding Subtitle}" Style="{StaticResource Muted}" LineBreakMode="TailTruncation" />
+                                    </VerticalStackLayout>
+
+                                    <Label Grid.Column="2"
+                                           Text="Sonando"
+                                           IsVisible="{Binding IsPlaying}"
+                                           FontSize="13" FontAttributes="Bold"
+                                           TextColor="{AppThemeBinding Light={StaticResource PrimaryTextLight}, Dark={StaticResource PrimaryTextDark}}"
+                                           VerticalOptions="Center" />
+
+                                    <ImageButton Grid.Column="3"
+                                                 Command="{Binding RemoveCommand, Source={RelativeSource AncestorType={x:Type vm:FavoritesViewModel}}, x:DataType=vm:FavoritesViewModel}"
+                                                 CommandParameter="{Binding .}"
+                                                 WidthRequest="40" HeightRequest="40" Padding="8"
+                                                 BackgroundColor="Transparent"
+                                                 SemanticProperties.Description="Quitar de favoritas">
+                                        <ImageButton.Source>
+                                            <FontImageSource Glyph="{x:Static f:FluentUI.delete_24_regular}"
+                                                             FontFamily="{x:Static f:FluentUI.FontFamily}"
+                                                             Color="{AppThemeBinding Light={StaticResource MutedTextLight}, Dark={StaticResource MutedTextDark}}"
+                                                             Size="22" />
+                                        </ImageButton.Source>
+                                    </ImageButton>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </RefreshView>
+        </Grid>
     </Grid>
 </ContentPage>
