@@ -5,11 +5,14 @@
         private readonly ISessionService _session;
         private readonly IFavoritesService _favorites;
 
-        public App(ISessionService session, IFavoritesService favorites)
+        public App(ISessionService session, IFavoritesService favorites, IThemeService theme)
         {
             InitializeComponent();
             _session = session;
             _favorites = favorites;
+
+            // Tema elegido por el usuario la última vez (sistema, claro u oscuro).
+            theme.ApplySaved();
         }
 
         protected override Window CreateWindow(IActivationState? activationState)

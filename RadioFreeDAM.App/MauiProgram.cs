@@ -76,6 +76,8 @@ namespace RadioFreeDAM
             builder.Services.AddSingleton<IFavoritesApiService, FavoritesApiService>();
             builder.Services.AddSingleton<ISessionService, SessionService>();
             builder.Services.AddSingleton<IFavoritesService, FavoritesService>();
+            builder.Services.AddSingleton<IThemeService, ThemeService>();
+            builder.Services.AddSingleton<IDialogService, ShellDialogService>();
 
             // ViewModels
             builder.Services.AddSingleton<HomeViewModel>();

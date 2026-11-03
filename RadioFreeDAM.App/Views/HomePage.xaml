@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:f="clr-namespace:Fonts"
              xmlns:vm="clr-namespace:RadioFreeDAM.ViewModels"
              xmlns:controls="clr-namespace:RadioFreeDAM.Views.Controls"
              x:Class="RadioFreeDAM.Views.HomePage"
@@ -14,7 +15,7 @@
           RowSpacing="{StaticResource LayoutSpacing}">
 
         <!-- Cabecera: título, estado del servidor y botón de recargar -->
-        <Grid Grid.Row="0" ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto" RowSpacing="6">
+        <Grid Grid.Row="0" ColumnDefinitions="*,Auto,Auto" RowDefinitions="Auto,Auto" RowSpacing="6" ColumnSpacing="8">
             <Label Text="Emisoras" Style="{StaticResource Title1}" />
 
             <Border Grid.Row="1" Style="{StaticResource ChipStyle}">
@@ -34,7 +35,22 @@
                 </HorizontalStackLayout>
             </Border>
 
-            <Button Grid.RowSpan="2" Grid.Column="1"
+            <!-- Tema: sistema, claro u oscuro -->
+            <ImageButton Grid.RowSpan="2" Grid.Column="1"
+                         Command="{Binding ChangeThemeCommand}"
+                         WidthRequest="44" HeightRequest="44" Padding="10"
+                         Background="Transparent"
+                         VerticalOptions="Center"
+                         SemanticProperties.Description="Cambiar el tema claro u oscuro">
+                <ImageButton.Source>
+                    <FontImageSource Glyph="{x:Static f:FluentUI.dark_theme_24_regular}"
+                                     FontFamily="{x:Static f:FluentUI.FontFamily}"
+                                     Color="{AppThemeBinding Light={StaticResource DarkOnLightBackground}, Dark={StaticResource LightOnDarkBackground}}"
+                                     Size="24" />
+                </ImageButton.Source>
+            </ImageButton>
+
+            <Button Grid.RowSpan="2" Grid.Column="2"
                     Text="Recargar"
                     Style="{StaticResource OutlineButton}"
                     VerticalOptions="Center"
