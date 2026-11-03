@@ -124,5 +124,5 @@ dotnet tool run dotnet-ef migrations add NombreDelCambio --project RadioFreeDAM.
 
 - [x] **Fase 1** · Arranque, interfaz y arquitectura: navegación por pestañas, 12 emisoras de prueba servidas por la API y reproductor simulado.
 - [x] **Fase 2** · Emisoras reales de Radio Browser, búsqueda por nombre, reproducción en streaming con MediaElement y mensajes de error de catálogo, conexión y audio.
-- [ ] **Fase 3** · Usuarios (registro e inicio de sesión con JWT) y favoritas persistentes en MariaDB.
+- [x] **Fase 3** · Usuarios (registro e inicio de sesión con JWT) y favoritas persistentes en MariaDB.
 - [ ] **Fase 4** · Consolidación, mejora y entrega.
