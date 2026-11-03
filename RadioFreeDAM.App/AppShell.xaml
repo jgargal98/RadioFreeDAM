@@ -4,8 +4,16 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:views="clr-namespace:RadioFreeDAM.Views"
+    xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
     Shell.FlyoutBehavior="Disabled"
     Title="RadioFreeDAM">
+
+    <!-- Barra de estado del móvil del mismo color que la app, con iconos legibles en cada tema -->
+    <Shell.Behaviors>
+        <toolkit:StatusBarBehavior
+            StatusBarColor="{AppThemeBinding Light={StaticResource LightBackground}, Dark={StaticResource DarkBackground}}"
+            StatusBarStyle="{AppThemeBinding Light=DarkContent, Dark=LightContent}" />
+    </Shell.Behaviors>
 
     <!-- Navegación por pestañas inferiores: tres secciones siempre a un toque. -->
     <TabBar>

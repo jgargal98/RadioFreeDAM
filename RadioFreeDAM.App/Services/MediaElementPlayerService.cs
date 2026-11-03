@@ -111,9 +111,10 @@ public class MediaElementPlayerService : IPlayerService
 
                 case MediaElementState.Paused:
                 case MediaElementState.Stopped:
-                    // Lo ha parado el sistema o se ha cortado el stream.
-                    CancelLoadingTimeout();
-                    SetState(PlaybackState.Stopped);
+                    // Mientras conecta, Android avisa de "Stopped" al cambiar de fuente: no es que se haya parado.
+                    // Solo cuenta si ya estaba sonando (lo ha parado el sistema o se ha cortado el stream).
+                    if (State == PlaybackState.Playing)
+                        SetState(PlaybackState.Stopped);
                     break;
             }
         });

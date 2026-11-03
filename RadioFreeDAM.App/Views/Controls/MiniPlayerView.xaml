@@ -61,7 +61,7 @@
                          Command="{Binding TogglePlaybackCommand}"
                          WidthRequest="44" HeightRequest="44"
                          CornerRadius="22" Padding="10"
-                         BackgroundColor="{StaticResource Primary}"
+                         Background="{StaticResource PrimaryBrush}"
                          VerticalOptions="Center"
                          SemanticProperties.Description="{Binding ToggleButtonText}">
                 <ImageButton.Source>

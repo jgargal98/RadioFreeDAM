@@ -6,6 +6,7 @@
              xmlns:vm="clr-namespace:RadioFreeDAM.ViewModels"
              x:Class="RadioFreeDAM.Views.PlayerPage"
              x:DataType="vm:PlayerViewModel"
+             Shell.NavBarIsVisible="False"
              Title="Reproductor">
 
     <Grid Padding="{StaticResource LayoutPadding}">
@@ -71,7 +72,7 @@
             <ImageButton Command="{Binding TogglePlaybackCommand}"
                          WidthRequest="88" HeightRequest="88"
                          CornerRadius="44" Padding="22"
-                         BackgroundColor="{StaticResource Primary}"
+                         Background="{StaticResource PrimaryBrush}"
                          HorizontalOptions="Center"
                          SemanticProperties.Description="{Binding ToggleButtonText}">
                 <ImageButton.Source>

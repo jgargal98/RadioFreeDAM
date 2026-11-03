@@ -6,6 +6,7 @@
              xmlns:controls="clr-namespace:RadioFreeDAM.Views.Controls"
              x:Class="RadioFreeDAM.Views.FavoritesPage"
              x:DataType="vm:FavoritesViewModel"
+             Shell.NavBarIsVisible="False"
              Title="Favoritos">
 
     <Grid RowDefinitions="*,Auto">
@@ -97,7 +98,7 @@
                                                  Command="{Binding RemoveCommand, Source={RelativeSource AncestorType={x:Type vm:FavoritesViewModel}}, x:DataType=vm:FavoritesViewModel}"
                                                  CommandParameter="{Binding .}"
                                                  WidthRequest="40" HeightRequest="40" Padding="8"
-                                                 BackgroundColor="Transparent"
+                                                 Background="Transparent"
                                                  SemanticProperties.Description="Quitar de favoritas">
                                         <ImageButton.Source>
                                             <FontImageSource Glyph="{x:Static f:FluentUI.delete_24_regular}"

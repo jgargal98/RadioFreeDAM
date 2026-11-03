@@ -5,6 +5,7 @@
              xmlns:controls="clr-namespace:RadioFreeDAM.Views.Controls"
              x:Class="RadioFreeDAM.Views.HomePage"
              x:DataType="vm:HomeViewModel"
+             Shell.NavBarIsVisible="False"
              Title="Inicio">
 
   <Grid RowDefinitions="*,Auto">
