@@ -116,6 +116,9 @@ builder.Services.AddScoped<IStationService>(serviceProvider =>
         serviceProvider,
         serviceProvider.GetRequiredService<RadioBrowserStationService>()));
 
+// Catálogo agrupado por cadenas (COPE Málaga, COPE Sevilla... en una sola fila).
+builder.Services.AddScoped<CatalogService>();
+
 var app = builder.Build();
 
 // Crea o actualiza las tablas rfd_* al arrancar (aplica las migraciones pendientes).

@@ -37,6 +37,12 @@ public class CachedStationService(
             _options.SearchDuration,
             () => inner.SearchByNameAsync(name, cancellationToken));
 
+    public Task<IReadOnlyList<StationDto>> SearchInCountryAsync(string name, CancellationToken cancellationToken = default) =>
+        GetOrFetchAsync(
+            $"stations:country-search:{name.Trim().ToLowerInvariant()}",
+            _options.TopStationsDuration,
+            () => inner.SearchInCountryAsync(name, cancellationToken));
+
     public async Task<IReadOnlyList<StationDto>> GetByIdsAsync(
         IReadOnlyCollection<string> ids,
         CancellationToken cancellationToken = default)

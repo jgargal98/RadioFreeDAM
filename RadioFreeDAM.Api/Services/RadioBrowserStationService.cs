@@ -37,6 +37,17 @@ public class RadioBrowserStationService(
         return GetStationsAsync(url, cancellationToken);
     }
 
+    public Task<IReadOnlyList<StationDto>> SearchInCountryAsync(string name, CancellationToken cancellationToken = default)
+    {
+        var url = "json/stations/search" +
+                  $"?name={Uri.EscapeDataString(name)}" +
+                  $"&countrycode={Uri.EscapeDataString(_options.CountryCode)}" +
+                  "&order=clickcount&reverse=true&hidebroken=true" +
+                  $"&limit={_options.NetworkLimit}";
+
+        return GetStationsAsync(url, cancellationToken);
+    }
+
     public async Task<IReadOnlyList<StationDto>> GetByIdsAsync(
         IReadOnlyCollection<string> ids,
         CancellationToken cancellationToken = default)
@@ -85,6 +96,9 @@ public class RadioBrowserStationService(
         Country = station.Country,
         Tags = station.Tags,
         Codec = station.Codec,
-        Bitrate = station.Bitrate
+        Bitrate = station.Bitrate,
+        ClickCount = station.ClickCount,
+        // Radio Browser no sabe de cadenas: se deduce por el nombre (ver NetworkCatalog).
+        NetworkId = NetworkCatalog.FindFor(station.Name)?.Id
     };
 }

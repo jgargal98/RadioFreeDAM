@@ -27,4 +27,10 @@ public class StationDto
 
     /// <summary>Calidad en kbps. 0 si no se conoce.</summary>
     public int Bitrate { get; set; }
+
+    /// <summary>Veces que se ha escuchado en Radio Browser: sirve para ordenar por popularidad.</summary>
+    public int ClickCount { get; set; }
+
+    /// <summary>Cadena a la que pertenece (por ejemplo "cope"), o null si es independiente.</summary>
+    public string? NetworkId { get; set; }
 }

@@ -115,6 +115,9 @@ public class CachedStationServiceTests
         public Task<IReadOnlyList<StationDto>> SearchByNameAsync(string name, CancellationToken cancellationToken = default) =>
             Task.FromResult(Next());
 
+        public Task<IReadOnlyList<StationDto>> SearchInCountryAsync(string name, CancellationToken cancellationToken = default) =>
+            Task.FromResult(Next());
+
         public Task<IReadOnlyList<StationDto>> GetByIdsAsync(IReadOnlyCollection<string> ids, CancellationToken cancellationToken = default) =>
             Task.FromResult(Next());
     }

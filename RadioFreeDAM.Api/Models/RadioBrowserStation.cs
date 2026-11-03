@@ -35,4 +35,7 @@ public class RadioBrowserStation
 
     [JsonPropertyName("bitrate")]
     public int Bitrate { get; set; }
+
+    [JsonPropertyName("clickcount")]
+    public int ClickCount { get; set; }
 }

@@ -16,9 +16,13 @@ public class RadioBrowserOptions
     /// <summary>Código ISO del país de las emisoras de Inicio.</summary>
     public string CountryCode { get; set; } = "ES";
 
-    public int TopLimit { get; set; } = 20;
+    /// <summary>Emisoras populares que se piden. Son más de las que se muestran porque al agrupar por cadenas se juntan varias.</summary>
+    public int TopLimit { get; set; } = 80;
 
-    public int SearchLimit { get; set; } = 30;
+    public int SearchLimit { get; set; } = 60;
+
+    /// <summary>Máximo de emisoras al listar todas las de una cadena.</summary>
+    public int NetworkLimit { get; set; } = 100;
 
     public int TimeoutSeconds { get; set; } = 8;
 }

@@ -64,7 +64,10 @@ public sealed class FakeStationService(params StationDto[] stations) : IStationS
         Task.FromResult<IReadOnlyList<StationDto>>(_stations);
 
     public Task<IReadOnlyList<StationDto>> SearchByNameAsync(string name, CancellationToken cancellationToken = default) =>
-        Task.FromResult<IReadOnlyList<StationDto>>(_stations.Where(s => s.Name.Contains(name)).ToList());
+        Task.FromResult<IReadOnlyList<StationDto>>(_stations.Where(s => s.Name.Contains(name, StringComparison.OrdinalIgnoreCase)).ToList());
+
+    public Task<IReadOnlyList<StationDto>> SearchInCountryAsync(string name, CancellationToken cancellationToken = default) =>
+        SearchByNameAsync(name, cancellationToken);
 
     public Task<IReadOnlyList<StationDto>> GetByIdsAsync(IReadOnlyCollection<string> ids, CancellationToken cancellationToken = default) =>
         Task.FromResult<IReadOnlyList<StationDto>>(_stations.Where(s => ids.Contains(s.Id)).ToList());
