@@ -157,6 +157,10 @@ public partial class PlayerViewModel : ObservableObject
     [RelayCommand]
     private Task GoToHomeAsync() => _navigationService.GoToHomeAsync();
 
+    /// <summary>Al tocar el mini reproductor se abre la pantalla completa.</summary>
+    [RelayCommand]
+    private Task GoToPlayerAsync() => _navigationService.GoToPlayerAsync();
+
     private void UpdateFromPlayer()
     {
         if (CurrentStation?.Id != _playerService.CurrentStation?.Id)

@@ -2,10 +2,12 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:RadioFreeDAM.ViewModels"
+             xmlns:controls="clr-namespace:RadioFreeDAM.Views.Controls"
              x:Class="RadioFreeDAM.Views.HomePage"
              x:DataType="vm:HomeViewModel"
              Title="Inicio">
 
+  <Grid RowDefinitions="*,Auto">
     <Grid RowDefinitions="Auto,Auto,Auto,Auto,*"
           Padding="{StaticResource LayoutPadding}"
           RowSpacing="{StaticResource LayoutSpacing}">
@@ -121,4 +123,8 @@
                            HorizontalOptions="Center" VerticalOptions="Center"
                            Color="{StaticResource Primary}" />
     </Grid>
+
+    <!-- Mini reproductor (su BindingContext lo pone el código de la página) -->
+    <controls:MiniPlayerView x:Name="MiniPlayer" Grid.Row="1" />
+  </Grid>
 </ContentPage>

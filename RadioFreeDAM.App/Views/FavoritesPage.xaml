@@ -3,11 +3,12 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:f="clr-namespace:Fonts"
              xmlns:vm="clr-namespace:RadioFreeDAM.ViewModels"
+             xmlns:controls="clr-namespace:RadioFreeDAM.Views.Controls"
              x:Class="RadioFreeDAM.Views.FavoritesPage"
              x:DataType="vm:FavoritesViewModel"
              Title="Favoritos">
 
-    <Grid>
+    <Grid RowDefinitions="*,Auto">
         <!-- Sin sesión: invitación a iniciarla -->
         <VerticalStackLayout IsVisible="{Binding IsLoggedOut}"
                              VerticalOptions="Center" HorizontalOptions="Center"
@@ -112,5 +113,8 @@
                 </CollectionView>
             </RefreshView>
         </Grid>
+
+        <!-- Mini reproductor (su BindingContext lo pone el código de la página) -->
+        <controls:MiniPlayerView x:Name="MiniPlayer" Grid.Row="1" />
     </Grid>
 </ContentPage>
