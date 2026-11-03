@@ -4,12 +4,14 @@
              xmlns:f="clr-namespace:Fonts"
              xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              xmlns:vm="clr-namespace:RadioFreeDAM.ViewModels"
+             xmlns:controls="clr-namespace:RadioFreeDAM.Views.Controls"
              x:Class="RadioFreeDAM.Views.PlayerPage"
              x:DataType="vm:PlayerViewModel"
              Shell.NavBarIsVisible="False"
              Title="Reproductor">
 
-    <Grid Padding="{StaticResource LayoutPadding}">
+    <!-- Fondo: degradado con el color de la emisora (lo calcula PlayerViewModel) -->
+    <Grid Padding="{StaticResource LayoutPadding}" Background="{Binding PlayerBackground}">
 
         <!-- Control de audio: invisible, lo maneja MediaElementPlayerService -->
         <toolkit:MediaElement x:Name="AudioPlayer"
@@ -28,12 +30,19 @@
         </VerticalStackLayout>
 
         <!-- Emisora seleccionada -->
+        <!-- En móvil ocupa todo el ancho (para que las ondas lleguen a los bordes); en escritorio, 420 centrado -->
         <VerticalStackLayout IsVisible="{Binding HasStation}"
-                             VerticalOptions="Center" HorizontalOptions="Center"
-                             Spacing="20" MaximumWidthRequest="420">
+                             VerticalOptions="Center"
+                             HorizontalOptions="{OnIdiom Phone=Fill, Default=Center}"
+                             WidthRequest="{OnIdiom Phone=-1, Default=420}"
+                             Spacing="16">
+
+            <!-- Ondas de sonido detrás del logo: se mueven mientras suena -->
+            <Grid HeightRequest="240">
+                <controls:SoundWavesView WaveColor="{Binding WaveColor}" IsAnimating="{Binding IsPlaying}" />
 
             <!-- Logo de la emisora; si no tiene, la inicial sobre fondo verde -->
-            <Grid WidthRequest="180" HeightRequest="180" HorizontalOptions="Center">
+            <Grid WidthRequest="180" HeightRequest="180" HorizontalOptions="Center" VerticalOptions="Center">
                 <Border Style="{StaticResource StationAvatarStyle}" StrokeShape="RoundRectangle 28"
                         IsVisible="{Binding HasFavicon, Converter={StaticResource InvertedBoolConverter}}">
                     <Label Text="{Binding StationInitial}"
@@ -45,6 +54,7 @@
                         IsVisible="{Binding HasFavicon}">
                     <Image Source="{Binding CurrentStation.FaviconUrl}" Aspect="AspectFit" />
                 </Border>
+            </Grid>
             </Grid>
 
             <VerticalStackLayout Spacing="4">

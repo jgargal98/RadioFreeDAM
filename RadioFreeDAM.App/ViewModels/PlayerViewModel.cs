@@ -12,23 +12,41 @@ public partial class PlayerViewModel : ObservableObject
     private readonly INavigationService _navigationService;
     private readonly ISessionService _session;
     private readonly IFavoritesService _favorites;
+    private readonly IStationColorService _stationColors;
+
+    /// <summary>Color de la emisora actual (sin suavizar); el verde de la app si no tiene.</summary>
+    private Color _accent = PlayerColors.DefaultAccent;
+    private CancellationTokenSource? _colorCts;
 
     public PlayerViewModel(
         IPlayerService playerService,
         INavigationService navigationService,
         ISessionService session,
-        IFavoritesService favorites)
+        IFavoritesService favorites,
+        IStationColorService stationColors)
     {
         _playerService = playerService;
         _navigationService = navigationService;
         _session = session;
         _favorites = favorites;
+        _stationColors = stationColors;
 
         _playerService.StateChanged += (_, _) => UpdateFromPlayer();
+        if (Application.Current is { } app)
+            app.RequestedThemeChanged += (_, _) => UpdateColors();
         _favorites.FavoritesChanged += (_, _) => UpdateFavorite();
         _session.SessionChanged += (_, _) => UpdateFavorite();
         UpdateFromPlayer();
+        UpdateColors();
     }
+
+    /// <summary>Fondo del Reproductor: degradado con el color de la emisora.</summary>
+    [ObservableProperty]
+    public partial Brush? PlayerBackground { get; set; }
+
+    /// <summary>Color de las ondas de fondo.</summary>
+    [ObservableProperty]
+    public partial Color WaveColor { get; set; } = PlayerColors.DefaultAccent;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(FavoriteButtonText))]
@@ -164,11 +182,42 @@ public partial class PlayerViewModel : ObservableObject
     private void UpdateFromPlayer()
     {
         if (CurrentStation?.Id != _playerService.CurrentStation?.Id)
+        {
             FavoriteErrorMessage = null;
-
+            _ = LoadStationColorAsync(_playerService.CurrentStation);
+        }
         CurrentStation = _playerService.CurrentStation;
         State = _playerService.State;
         ErrorMessage = _playerService.ErrorMessage;
         UpdateFavorite();
+    }
+
+    /// <summary>Al cambiar de emisora, saca su color del logo (en segundo plano) y repinta el fondo.</summary>
+    private async Task LoadStationColorAsync(StationDto? station)
+    {
+        _colorCts?.Cancel();
+        var cts = _colorCts = new CancellationTokenSource();
+
+        // Mientras se calcula, el verde de la app.
+        _accent = PlayerColors.DefaultAccent;
+        UpdateColors();
+
+        if (station is null)
+            return;
+
+        var color = await _stationColors.GetAccentColorAsync(station, cts.Token);
+        if (cts.IsCancellationRequested)
+            return;
+
+        _accent = color ?? PlayerColors.DefaultAccent;
+        UpdateColors();
+    }
+
+    private void UpdateColors()
+    {
+        var isDark = Application.Current?.RequestedTheme == AppTheme.Dark;
+        // Sin emisora, el fondo normal de la página.
+        PlayerBackground = _playerService.CurrentStation is null ? null : PlayerColors.Background(_accent, isDark);
+        WaveColor = PlayerColors.Waves(_accent, isDark);
     }
 }
