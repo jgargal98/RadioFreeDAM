@@ -39,12 +39,12 @@
                     SemanticProperties.Hint="Vuelve a comprobar el servidor y cargar las emisoras" />
         </Grid>
 
-        <!-- Búsqueda por nombre: la resuelve la API consultando Radio Browser -->
+        <!-- Búsqueda por nombre mientras se escribe: la resuelve la API consultando Radio Browser -->
         <SearchBar Grid.Row="1"
                    Placeholder="Buscar emisora por nombre"
                    Text="{Binding SearchText}"
                    SearchCommand="{Binding SearchCommand}"
-                   SemanticProperties.Hint="Escribe el nombre de una emisora y pulsa buscar" />
+                   SemanticProperties.Hint="Escribe el nombre de una emisora; los resultados aparecen solos" />
 
         <!-- Mensaje de error (servidor caído, Radio Browser no disponible...) -->
         <Border Grid.Row="2" Style="{StaticResource CardStyle}" IsVisible="{Binding HasError}">
@@ -60,6 +60,13 @@
             <CollectionView.ItemsLayout>
                 <LinearItemsLayout Orientation="Vertical" ItemSpacing="8" />
             </CollectionView.ItemsLayout>
+
+            <!-- Lista vacía: búsqueda sin resultados -->
+            <CollectionView.EmptyView>
+                <VerticalStackLayout Padding="0,40" Spacing="8" HorizontalOptions="Center" MaximumWidthRequest="360">
+                    <Label Text="{Binding EmptyMessage}" Style="{StaticResource Muted}" HorizontalTextAlignment="Center" />
+                </VerticalStackLayout>
+            </CollectionView.EmptyView>
 
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="vm:StationItemViewModel">

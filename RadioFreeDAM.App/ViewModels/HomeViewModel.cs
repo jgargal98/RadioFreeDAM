@@ -12,6 +12,7 @@ namespace RadioFreeDAM.ViewModels;
 public partial class HomeViewModel : ObservableObject
 {
     private const int MinSearchLength = 2;
+    private static readonly TimeSpan SearchDelay = TimeSpan.FromMilliseconds(500);
 
     private readonly IApiStatusService _apiStatusService;
     private readonly IStationApiService _stationApiService;
@@ -21,6 +22,11 @@ public partial class HomeViewModel : ObservableObject
 
     /// <summary>Texto de la búsqueda cuyos resultados se muestran; null si se muestran las populares.</summary>
     private string? _activeSearch;
+
+    private CancellationTokenSource? _searchDelayCts;
+
+    /// <summary>Número de la última carga pedida; las respuestas de cargas anteriores se ignoran.</summary>
+    private int _requestVersion;
 
     public HomeViewModel(
         IApiStatusService apiStatusService,
@@ -49,6 +55,10 @@ public partial class HomeViewModel : ObservableObject
     public partial string? ErrorMessage { get; set; }
 
     public bool HasError => !string.IsNullOrEmpty(ErrorMessage);
+
+    /// <summary>Texto cuando la lista queda vacía (por ejemplo, una búsqueda sin resultados).</summary>
+    [ObservableProperty]
+    public partial string? EmptyMessage { get; set; }
 
     [ObservableProperty]
     public partial bool IsLoading { get; set; }
@@ -100,31 +110,45 @@ public partial class HomeViewModel : ObservableObject
             await LoadSearchAsync(_activeSearch);
     }
 
+    /// <summary>Al pulsar Buscar (Enter): busca ya, sin esperar.</summary>
     [RelayCommand]
     private async Task SearchAsync()
     {
-        var text = SearchText.Trim();
-
-        if (text.Length == 0)
-        {
-            await LoadTopStationsAsync();
-            return;
-        }
-
-        if (text.Length < MinSearchLength)
-        {
-            ErrorMessage = $"Escribe al menos {MinSearchLength} caracteres para buscar.";
-            return;
-        }
-
-        await LoadSearchAsync(text);
+        _searchDelayCts?.Cancel();
+        await SearchNowAsync(SearchText.Trim());
     }
 
-    /// <summary>Al borrar la búsqueda se vuelve a las emisoras populares.</summary>
+    /// <summary>
+    /// Búsqueda mientras se escribe: espera medio segundo sin cambios en el texto antes de buscar,
+    /// para no lanzar una petición por cada letra.
+    /// </summary>
     partial void OnSearchTextChanged(string value)
     {
-        if (string.IsNullOrWhiteSpace(value) && _activeSearch is not null)
-            LoadTopStationsCommand.Execute(null);
+        _searchDelayCts?.Cancel();
+        var cts = _searchDelayCts = new CancellationTokenSource();
+
+        Task.Delay(SearchDelay, cts.Token).ContinueWith(task =>
+        {
+            if (!task.IsCanceled)
+                MainThread.BeginInvokeOnMainThread(async () => await SearchNowAsync(value.Trim()));
+        }, TaskScheduler.Default);
+    }
+
+    private async Task SearchNowAsync(string text)
+    {
+        if (text.Length == 0)
+        {
+            // Búsqueda borrada: vuelven las populares.
+            if (_activeSearch is not null || Stations.Count == 0)
+                await LoadTopStationsAsync();
+            return;
+        }
+
+        // Con una sola letra todavía no se busca (la API exige al menos 2).
+        if (text.Length < MinSearchLength || text == _activeSearch)
+            return;
+
+        await LoadSearchAsync(text);
     }
 
     [RelayCommand]
@@ -134,50 +158,59 @@ public partial class HomeViewModel : ObservableObject
     private Task LoadSearchAsync(string text) =>
         LoadStationsAsync(() => _stationApiService.SearchAsync(text), search: text, title: $"Resultados de «{text}»");
 
+    /// <summary>
+    /// Carga una lista de emisoras. Si mientras tanto empieza otra carga (el usuario sigue escribiendo),
+    /// el resultado de esta se descarta: siempre se muestra la última búsqueda.
+    /// </summary>
     private async Task LoadStationsAsync(Func<Task<IReadOnlyList<StationDto>>> fetch, string? search, string title)
     {
-        if (IsLoading)
-            return;
-
+        var request = ++_requestVersion;
         IsLoading = true;
         ErrorMessage = null;
+        EmptyMessage = null;
 
         try
         {
             var stations = await fetch();
-            IsServerOnline = true;
+            if (request != _requestVersion)
+                return;
 
+            IsServerOnline = true;
             _activeSearch = search;
             ListTitle = title;
             Stations.Clear();
             foreach (var station in stations)
                 Stations.Add(new StationItemViewModel(station));
 
+            EmptyMessage = search is null
+                ? "La API no ha devuelto ninguna emisora."
+                : $"No hay emisoras que coincidan con «{search}». Prueba con otro nombre.";
+
             RefreshPlaybackMarks();
         }
-        catch (HttpRequestException ex) when (ex.StatusCode is null)
+        catch (Exception ex) when (request == _requestVersion && ApiException.IsCommunicationError(ex))
         {
-            // No hay respuesta: la API está apagada o no es alcanzable.
-            IsServerOnline = false;
-            ErrorMessage = $"No se puede conectar con la API en {ApiConfig.BaseUrl}. Comprueba que está arrancada.";
-        }
-        catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.BadGateway)
-        {
-            // La API responde, pero Radio Browser no.
-            IsServerOnline = true;
-            ErrorMessage = "El catálogo de emisoras (Radio Browser) no está disponible ahora mismo. Inténtalo de nuevo en unos minutos.";
-        }
-        catch (HttpRequestException)
-        {
-            ErrorMessage = "No se ha podido cargar el catálogo de emisoras. Inténtalo de nuevo.";
-        }
-        catch (TaskCanceledException)
-        {
-            ErrorMessage = "El servidor está tardando demasiado en responder. Inténtalo de nuevo.";
+            ErrorMessage = ex switch
+            {
+                // No hay respuesta: la API está apagada o no es alcanzable.
+                HttpRequestException { StatusCode: null } or Polly.CircuitBreaker.BrokenCircuitException =>
+                    $"No se puede conectar con la API en {ApiConfig.BaseUrl}. Comprueba que está arrancada.",
+                // La API responde, pero Radio Browser no.
+                HttpRequestException { StatusCode: HttpStatusCode.BadGateway } =>
+                    "El catálogo de emisoras (Radio Browser) no está disponible ahora mismo. Inténtalo de nuevo en unos minutos.",
+                HttpRequestException =>
+                    "No se ha podido cargar el catálogo de emisoras. Inténtalo de nuevo.",
+                _ => ApiException.ToUserMessage(ex)
+            };
+
+            IsServerOnline = ex is HttpRequestException { StatusCode: null } or Polly.CircuitBreaker.BrokenCircuitException
+                ? false
+                : IsServerOnline;
         }
         finally
         {
-            IsLoading = false;
+            if (request == _requestVersion)
+                IsLoading = false;
         }
     }
 
