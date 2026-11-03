@@ -43,7 +43,7 @@ App MAUI ──HTTP/JSON──▶ API ASP.NET Core ──▶ Radio Browser      
 
 ## Base de datos
 
-MariaDB remota del centro (`SERVIDOR`, base de datos `BASE_DE_DATOS`), compartida con otro proyecto. Por eso todas las tablas llevan el prefijo `rfd_`:
+MariaDB remota del centro (servidor, base de datos y usuario proporcionados por el profesor), compartida con otro proyecto. Por eso todas las tablas llevan el prefijo `rfd_`:
 
 | Tabla | Contenido |
 |---|---|
@@ -84,10 +84,10 @@ La caché se vacía al reiniciar la API.
 
 ### 1. Secretos (solo la primera vez)
 
-La contraseña de la base de datos y la clave de los tokens **no están en el repositorio**: se guardan con `dotnet user-secrets` en tu usuario de Windows.
+Los datos de conexión a la base de datos y la clave de los tokens **no están en el repositorio**: se guardan con `dotnet user-secrets` en tu usuario de Windows.
 
 ```bash
-dotnet user-secrets set "ConnectionStrings:RadioFreeDAM" "Server=SERVIDOR;Port=3306;Database=BASE_DE_DATOS;User=USUARIO;Password=TU_CONTRASEÑA" --project RadioFreeDAM.Api
+dotnet user-secrets set "ConnectionStrings:RadioFreeDAM" "Server=SERVIDOR;Port=3306;Database=BASE_DE_DATOS;User=USUARIO;Password=CONTRASEÑA" --project RadioFreeDAM.Api
 ```
 
 ```bash
