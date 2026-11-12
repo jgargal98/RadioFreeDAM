@@ -37,11 +37,12 @@ public class CachedStationService(
             _options.SearchDuration,
             () => inner.SearchByNameAsync(name, cancellationToken));
 
-    public Task<IReadOnlyList<StationDto>> SearchInCountryAsync(string name, CancellationToken cancellationToken = default) =>
+    public Task<IReadOnlyList<StationDto>> QueryAsync(StationQuery query, CancellationToken cancellationToken = default) =>
         GetOrFetchAsync(
-            $"stations:country-search:{name.Trim().ToLowerInvariant()}",
-            _options.TopStationsDuration,
-            () => inner.SearchInCountryAsync(name, cancellationToken));
+            $"stations:query:{query.Name?.Trim().ToLowerInvariant()}|{query.CountryOnly}|{string.Join(',', query.Tags)}|{query.Sort}|{query.Limit}",
+            // Name searches change more often than the plain top lists.
+            string.IsNullOrWhiteSpace(query.Name) ? _options.TopStationsDuration : _options.SearchDuration,
+            () => inner.QueryAsync(query, cancellationToken));
 
     public async Task<IReadOnlyList<StationDto>> GetByIdsAsync(
         IReadOnlyCollection<string> ids,

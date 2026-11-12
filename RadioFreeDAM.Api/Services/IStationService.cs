@@ -16,9 +16,9 @@ public interface IStationService
     /// <exception cref="StationCatalogUnavailableException">Si el catálogo externo no responde.</exception>
     Task<IReadOnlyList<StationDto>> SearchByNameAsync(string name, CancellationToken cancellationToken = default);
 
-    /// <summary>Busca por nombre solo en el país configurado (por ejemplo, todas las COPE de España).</summary>
-    /// <exception cref="StationCatalogUnavailableException">Si el catálogo externo no responde.</exception>
-    Task<IReadOnlyList<StationDto>> SearchInCountryAsync(string name, CancellationToken cancellationToken = default);
+    /// <summary>Stations matching a query: name, country scope, category tags and sort order.</summary>
+    /// <exception cref="StationCatalogUnavailableException">If the external catalog does not answer.</exception>
+    Task<IReadOnlyList<StationDto>> QueryAsync(StationQuery query, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Emisoras con esos Ids (stationuuid). Las que ya no existan en el catálogo no se devuelven.

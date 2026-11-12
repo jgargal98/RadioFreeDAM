@@ -2,32 +2,61 @@ using RadioFreeDAM.Shared.Dtos;
 
 namespace RadioFreeDAM.Api.Services;
 
+/// <summary>What the app asks the catalog for. Ids come from <see cref="CatalogFilters"/>.</summary>
+public record CatalogRequest(string? Name, string Scope, string Category, string Sort)
+{
+    public static readonly CatalogRequest Default =
+        new(null, CatalogFilters.ScopeSpain, CatalogFilters.AllCategories, CatalogFilters.SortClicks);
+}
+
 /// <summary>
-/// Catálogo tal y como lo enseña la app: las emisoras de una misma cadena (COPE Málaga, COPE Sevilla...)
-/// se juntan en una sola fila, y desde ella se elige la ciudad.
+/// Catalog as the app shows it: filtered by scope, category and sort order, and with the stations of the
+/// same network (COPE Málaga, COPE Sevilla...) joined in one row from which the city is chosen.
 /// </summary>
 public class CatalogService(IStationService stations)
 {
-    /// <summary>Filas que muestra Inicio.</summary>
+    /// <summary>Rows shown in the home list when there is no text search.</summary>
     public const int TopEntries = 20;
 
-    public async Task<IReadOnlyList<CatalogEntryDto>> GetTopAsync(CancellationToken cancellationToken = default) =>
-        Group(await stations.GetTopStationsAsync(cancellationToken), TopEntries);
+    /// <summary>
+    /// More stations than rows are requested because grouping joins several of them in one row.
+    /// A text search shows every match, so it needs fewer.
+    /// </summary>
+    private const int TopFetchLimit = 80;
+    private const int SearchFetchLimit = 60;
+    private const int NetworkFetchLimit = 100;
 
-    public async Task<IReadOnlyList<CatalogEntryDto>> SearchAsync(string name, CancellationToken cancellationToken = default) =>
-        Group(await stations.SearchByNameAsync(name, cancellationToken), int.MaxValue);
+    /// <exception cref="ValidationFailedException">If a filter id is unknown.</exception>
+    public async Task<IReadOnlyList<CatalogEntryDto>> GetAsync(CatalogRequest request, CancellationToken cancellationToken = default)
+    {
+        Validate(request);
 
-    /// <summary>Todas las emisoras de una cadena en el país configurado, de la más a la menos escuchada.</summary>
-    /// <exception cref="NotFoundAppException">Si la cadena no existe.</exception>
+        var isSearch = !string.IsNullOrWhiteSpace(request.Name);
+        var query = new StationQuery(
+            request.Name?.Trim(),
+            CountryOnly: request.Scope == CatalogFilters.ScopeSpain,
+            Tags: CategoryTags.For(request.Category),
+            Sort: request.Sort,
+            Limit: isSearch ? SearchFetchLimit : TopFetchLimit);
+
+        var found = await stations.QueryAsync(query, cancellationToken);
+        return Group(found, isSearch ? int.MaxValue : TopEntries);
+    }
+
+    /// <summary>All the stations of a network in the configured country, from the most to the least listened.</summary>
+    /// <exception cref="NotFoundAppException">If the network does not exist.</exception>
     public async Task<IReadOnlyList<StationDto>> GetNetworkStationsAsync(string networkId, CancellationToken cancellationToken = default)
     {
         var network = NetworkCatalog.FindById(networkId)
             ?? throw new NotFoundAppException("Esa cadena no existe.");
 
-        // Una búsqueda por cada forma de escribir el nombre ("esradio" y "es radio"); luego se juntan.
+        // One search per way of writing the name ("esradio" and "es radio"); the results are merged afterwards.
         var found = new List<StationDto>();
         foreach (var term in network.SearchTerms)
-            found.AddRange(await stations.SearchInCountryAsync(term, cancellationToken));
+        {
+            var query = new StationQuery(term, CountryOnly: true, Tags: [], CatalogFilters.SortClicks, NetworkFetchLimit);
+            found.AddRange(await stations.QueryAsync(query, cancellationToken));
+        }
 
         return found
             .Where(s => network.Contains(s.Name))
@@ -36,10 +65,20 @@ public class CatalogService(IStationService stations)
             .ToList();
     }
 
+    private static void Validate(CatalogRequest request)
+    {
+        if (!CatalogFilters.IsValidScope(request.Scope))
+            throw new ValidationFailedException("El ámbito no es válido.");
+        if (!CatalogFilters.IsValidCategory(request.Category))
+            throw new ValidationFailedException("La categoría no es válida.");
+        if (!CatalogFilters.IsValidSort(request.Sort))
+            throw new ValidationFailedException("El orden no es válido.");
+    }
+
     /// <summary>
-    /// Junta en una fila las emisoras de una misma cadena. Una cadena solo se agrupa si aparece más de una vez:
-    /// si en la lista solo hay una COPE, se muestra tal cual. Se respeta el orden (la fila de la cadena va
-    /// donde estaba su emisora más popular).
+    /// Joins in one row the stations of the same network. A network is only grouped if it appears more than once:
+    /// a single COPE in the list is shown as a plain station. Order is respected (the network row goes where
+    /// its most popular station was).
     /// </summary>
     public static IReadOnlyList<CatalogEntryDto> Group(IReadOnlyList<StationDto> stations, int limit)
     {
@@ -66,7 +105,7 @@ public class CatalogService(IStationService stations)
             }
 
             if (!added.Add(networkId))
-                continue; // ya está la fila de esta cadena
+                continue; // the row of this network is already there
 
             entries.Add(new CatalogEntryDto
             {

@@ -93,3 +93,111 @@ public class CatalogServiceTests
             () => new CatalogService(new FakeStationService()).GetNetworkStationsAsync("no-existe"));
     }
 }
+
+public class CatalogFilterTests
+{
+    private static StationDto Station(string id, string name, string tags = "", int clicks = 0, int votes = 0) =>
+        new() { Id = id, Name = name, Tags = tags, ClickCount = clicks, Votes = votes, StreamUrl = "https://stream.example.com" };
+
+    [Fact]
+    public async Task ByDefaultAsksForTheSpanishTop_MostListened()
+    {
+        var catalog = new FakeStationService();
+
+        await new CatalogService(catalog).GetAsync(CatalogRequest.Default);
+
+        Assert.True(catalog.LastQuery!.CountryOnly);
+        Assert.Empty(catalog.LastQuery.Tags);
+        Assert.Equal("clicks", catalog.LastQuery.Sort);
+        Assert.Null(catalog.LastQuery.Name);
+    }
+
+    [Fact]
+    public async Task WorldScope_DoesNotLimitToTheCountry()
+    {
+        var catalog = new FakeStationService();
+
+        await new CatalogService(catalog).GetAsync(CatalogRequest.Default with { Scope = "world" });
+
+        Assert.False(catalog.LastQuery!.CountryOnly);
+    }
+
+    [Theory]
+    [InlineData("news", "news", "noticias")]
+    [InlineData("music", "music", "musica")]
+    [InlineData("jazz", "jazz")]
+    public async Task CategoryIsTranslatedToRadioBrowserTags(string category, params string[] expectedTags)
+    {
+        var catalog = new FakeStationService();
+
+        await new CatalogService(catalog).GetAsync(CatalogRequest.Default with { Category = category });
+
+        Assert.Equal(expectedTags, catalog.LastQuery!.Tags);
+    }
+
+    [Fact]
+    public async Task OnlyStationsOfTheCategoryAreReturned()
+    {
+        var catalog = new FakeStationService(
+            Station("1", "Radio Jazz", tags: "jazz,lounge"),
+            Station("2", "Radio Rock", tags: "rock"));
+
+        var entries = await new CatalogService(catalog).GetAsync(CatalogRequest.Default with { Category = "jazz" });
+
+        Assert.Equal("1", Assert.Single(entries).Station?.Id);
+    }
+
+    [Fact]
+    public async Task SortByNameOrdersAlphabetically()
+    {
+        var catalog = new FakeStationService(Station("1", "Zeta", clicks: 99), Station("2", "Alfa", clicks: 1));
+
+        var entries = await new CatalogService(catalog).GetAsync(CatalogRequest.Default with { Sort = "name" });
+
+        Assert.Equal(["2", "1"], entries.Select(e => e.Station!.Id));
+    }
+
+    [Fact]
+    public async Task SortByVotesOrdersFromTheMostVoted()
+    {
+        var catalog = new FakeStationService(Station("1", "A", votes: 5), Station("2", "B", votes: 50));
+
+        var entries = await new CatalogService(catalog).GetAsync(CatalogRequest.Default with { Sort = "votes" });
+
+        Assert.Equal(["2", "1"], entries.Select(e => e.Station!.Id));
+    }
+
+    [Fact]
+    public async Task TextSearchIsCombinedWithTheFilters()
+    {
+        var catalog = new FakeStationService();
+
+        await new CatalogService(catalog).GetAsync(new CatalogRequest("cope", "world", "news", "name"));
+
+        var query = catalog.LastQuery!;
+        Assert.Equal("cope", query.Name);
+        Assert.False(query.CountryOnly);
+        Assert.Equal("name", query.Sort);
+        Assert.NotEmpty(query.Tags);
+    }
+
+    [Theory]
+    [InlineData("moon", "all", "clicks")]
+    [InlineData("spain", "polka", "clicks")]
+    [InlineData("spain", "all", "random")]
+    public async Task UnknownFilterIds_AreRejected(string scope, string category, string sort)
+    {
+        var request = new CatalogRequest(null, scope, category, sort);
+
+        await Assert.ThrowsAsync<ValidationFailedException>(() => new CatalogService(new FakeStationService()).GetAsync(request));
+    }
+
+    [Fact]
+    public void EveryCategoryOfTheFilterHasTagsExceptAll()
+    {
+        foreach (var category in CatalogFilters.Categories.Where(c => c.Id != CatalogFilters.AllCategories))
+            Assert.NotEmpty(CategoryTags.For(category.Id));
+
+        Assert.Empty(CategoryTags.For(CatalogFilters.AllCategories));
+    }
+}

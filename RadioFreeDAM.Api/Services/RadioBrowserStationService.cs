@@ -37,15 +37,32 @@ public class RadioBrowserStationService(
         return GetStationsAsync(url, cancellationToken);
     }
 
-    public Task<IReadOnlyList<StationDto>> SearchInCountryAsync(string name, CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<StationDto>> QueryAsync(StationQuery query, CancellationToken cancellationToken = default)
     {
-        var url = "json/stations/search" +
-                  $"?name={Uri.EscapeDataString(name)}" +
-                  $"&countrycode={Uri.EscapeDataString(_options.CountryCode)}" +
-                  "&order=clickcount&reverse=true&hidebroken=true" +
-                  $"&limit={_options.NetworkLimit}";
+        // A category can be several tags (for example "news" and "noticias"): one request per tag, in parallel.
+        IReadOnlyList<string?> tags = query.Tags.Count == 0 ? [null] : [.. query.Tags];
+        var requests = tags.Select(tag => GetStationsAsync(BuildSearchUrl(query, tag), cancellationToken));
+        var results = await Task.WhenAll(requests);
 
-        return GetStationsAsync(url, cancellationToken);
+        var merged = results.SelectMany(r => r).DistinctBy(s => s.Id);
+        return StationSort.Apply(merged, query.Sort).Take(query.Limit).ToList();
+    }
+
+    private string BuildSearchUrl(StationQuery query, string? tag)
+    {
+        var (order, reverse) = StationSort.ToRadioBrowser(query.Sort);
+
+        var url = $"json/stations/search?order={order}&reverse={reverse.ToString().ToLowerInvariant()}" +
+                  $"&hidebroken=true&limit={query.Limit}";
+
+        if (!string.IsNullOrWhiteSpace(query.Name))
+            url += $"&name={Uri.EscapeDataString(query.Name)}";
+        if (query.CountryOnly)
+            url += $"&countrycode={Uri.EscapeDataString(_options.CountryCode)}";
+        if (tag is not null)
+            url += $"&tag={Uri.EscapeDataString(tag)}";
+
+        return url;
     }
 
     public async Task<IReadOnlyList<StationDto>> GetByIdsAsync(
@@ -98,6 +115,8 @@ public class RadioBrowserStationService(
         Codec = station.Codec,
         Bitrate = station.Bitrate,
         ClickCount = station.ClickCount,
+        Votes = station.Votes,
+        ClickTrend = station.ClickTrend,
         // Radio Browser no sabe de cadenas: se deduce por el nombre (ver NetworkCatalog).
         NetworkId = NetworkCatalog.FindFor(station.Name)?.Id
     };

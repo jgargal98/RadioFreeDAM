@@ -36,8 +36,8 @@ public class MockStationService : IStationService
         return Task.FromResult(result);
     }
 
-    public Task<IReadOnlyList<StationDto>> SearchInCountryAsync(string name, CancellationToken cancellationToken = default) =>
-        SearchByNameAsync(name, cancellationToken);
+    public Task<IReadOnlyList<StationDto>> QueryAsync(StationQuery query, CancellationToken cancellationToken = default) =>
+        SearchByNameAsync(query.Name ?? string.Empty, cancellationToken);
 
     public Task<IReadOnlyList<StationDto>> GetByIdsAsync(IReadOnlyCollection<string> ids, CancellationToken cancellationToken = default)
     {

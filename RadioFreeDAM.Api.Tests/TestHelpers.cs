@@ -66,8 +66,18 @@ public sealed class FakeStationService(params StationDto[] stations) : IStationS
     public Task<IReadOnlyList<StationDto>> SearchByNameAsync(string name, CancellationToken cancellationToken = default) =>
         Task.FromResult<IReadOnlyList<StationDto>>(_stations.Where(s => s.Name.Contains(name, StringComparison.OrdinalIgnoreCase)).ToList());
 
-    public Task<IReadOnlyList<StationDto>> SearchInCountryAsync(string name, CancellationToken cancellationToken = default) =>
-        SearchByNameAsync(name, cancellationToken);
+    // Remembers the last query so tests can check what the catalog asked for.
+    public StationQuery? LastQuery { get; private set; }
+
+    public Task<IReadOnlyList<StationDto>> QueryAsync(StationQuery query, CancellationToken cancellationToken = default)
+    {
+        LastQuery = query;
+        var found = _stations.Where(s =>
+            (string.IsNullOrEmpty(query.Name) || s.Name.Contains(query.Name, StringComparison.OrdinalIgnoreCase)) &&
+            (query.Tags.Count == 0 || query.Tags.Any(tag => s.Tags.Contains(tag, StringComparison.OrdinalIgnoreCase))));
+
+        return Task.FromResult(StationSort.Apply(found, query.Sort));
+    }
 
     public Task<IReadOnlyList<StationDto>> GetByIdsAsync(IReadOnlyCollection<string> ids, CancellationToken cancellationToken = default) =>
         Task.FromResult<IReadOnlyList<StationDto>>(_stations.Where(s => ids.Contains(s.Id)).ToList());

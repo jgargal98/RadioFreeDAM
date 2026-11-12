@@ -31,6 +31,12 @@ public class StationDto
     /// <summary>Veces que se ha escuchado en Radio Browser: sirve para ordenar por popularidad.</summary>
     public int ClickCount { get; set; }
 
+    /// <summary>Votes of the users in Radio Browser.</summary>
+    public int Votes { get; set; }
+
+    /// <summary>Clicks in the last 24 hours compared with the previous ones: how much the station is trending.</summary>
+    public int ClickTrend { get; set; }
+
     /// <summary>Cadena a la que pertenece (por ejemplo "cope"), o null si es independiente.</summary>
     public string? NetworkId { get; set; }
 }
