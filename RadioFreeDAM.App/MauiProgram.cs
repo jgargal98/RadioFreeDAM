@@ -79,6 +79,7 @@ namespace RadioFreeDAM
             builder.Services.AddSingleton<IThemeService, ThemeService>();
             builder.Services.AddSingleton<IStationColorService, StationColorService>();
             builder.Services.AddSingleton<IAccentService, AccentService>();
+            builder.Services.AddSingleton<IDialogService, ShellDialogService>();
 
             // ViewModels
             builder.Services.AddSingleton<HomeViewModel>();

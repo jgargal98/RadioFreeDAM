@@ -96,6 +96,30 @@
                 Value="{AppThemeBinding Light={StaticResource MutedTextLight}, Dark={StaticResource MutedTextDark}}" />
     </Style>
 
+    <!-- Segmented control (scope, sort): rounded container with its segments inside -->
+    <Style x:Key="SegmentedStyle" TargetType="Border">
+        <Setter Property="StrokeShape" Value="RoundRectangle 24" />
+        <Setter Property="StrokeThickness" Value="0" />
+        <Setter Property="Padding" Value="4" />
+        <Setter Property="Background" Value="{AppThemeBinding Light={StaticResource LightSecondaryBackground}, Dark={StaticResource DarkSecondaryBackground}}" />
+    </Style>
+
+    <Style x:Key="SegmentStyle" TargetType="Border">
+        <Setter Property="StrokeShape" Value="RoundRectangle 20" />
+        <Setter Property="StrokeThickness" Value="0" />
+        <Setter Property="Padding" Value="10,10" />
+        <Setter Property="Background" Value="Transparent" />
+    </Style>
+
+    <!-- Category chip -->
+    <Style x:Key="FilterChipStyle" TargetType="Border">
+        <Setter Property="StrokeShape" Value="RoundRectangle 22" />
+        <Setter Property="StrokeThickness" Value="0" />
+        <Setter Property="Padding" Value="18,0" />
+        <Setter Property="HeightRequest" Value="44" />
+        <Setter Property="Background" Value="{AppThemeBinding Light={StaticResource ChipLight}, Dark={StaticResource ChipDark}}" />
+    </Style>
+
     <!-- Título de sección (Ajustes) -->
     <Style x:Key="SectionTitle"
            TargetType="Label">

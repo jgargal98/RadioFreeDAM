@@ -10,130 +10,210 @@
              Title="Inicio">
 
   <Grid RowDefinitions="*,Auto">
-    <Grid RowDefinitions="Auto,Auto,Auto,Auto,*"
-          Padding="{StaticResource LayoutPadding}"
-          RowSpacing="{StaticResource LayoutSpacing}">
 
-        <!-- Cabecera: título, estado del servidor y botón de recargar -->
-        <Grid Grid.Row="0" ColumnDefinitions="*,Auto,Auto" RowDefinitions="Auto,Auto" RowSpacing="6" ColumnSpacing="8">
-            <Label Text="Emisoras" Style="{StaticResource Title1}" />
+    <!-- Everything scrolls together: the header (greeting, search, filters) is the header of the list -->
+    <Grid Padding="{StaticResource LayoutPadding}">
+      <CollectionView ItemsSource="{Binding Stations}" SelectionMode="None">
+        <CollectionView.ItemsLayout>
+            <LinearItemsLayout Orientation="Vertical" ItemSpacing="8" />
+        </CollectionView.ItemsLayout>
 
-            <Border Grid.Row="1" Style="{StaticResource ChipStyle}">
-                <HorizontalStackLayout Spacing="6">
-                    <Ellipse WidthRequest="8" HeightRequest="8" VerticalOptions="Center"
-                             Fill="{StaticResource Gray400}">
-                        <Ellipse.Triggers>
-                            <DataTrigger TargetType="Ellipse" Binding="{Binding IsServerOk}" Value="True">
-                                <Setter Property="Fill" Value="{StaticResource Online}" />
-                            </DataTrigger>
-                            <DataTrigger TargetType="Ellipse" Binding="{Binding IsServerDown}" Value="True">
-                                <Setter Property="Fill" Value="{StaticResource Error}" />
-                            </DataTrigger>
-                        </Ellipse.Triggers>
-                    </Ellipse>
-                    <Label Text="{Binding ServerStatusText}" Style="{StaticResource Muted}" FontSize="13" />
-                </HorizontalStackLayout>
-            </Border>
+        <CollectionView.Header>
+            <VerticalStackLayout Spacing="12" Padding="0,0,0,12">
 
-            <!-- Ajustes: cuenta, tema y color de acento -->
-            <ImageButton Grid.RowSpan="2" Grid.Column="1"
-                         Command="{Binding OpenSettingsCommand}"
-                         WidthRequest="44" HeightRequest="44" Padding="10"
-                         Background="Transparent"
-                         VerticalOptions="Center"
-                         SemanticProperties.Description="Ajustes">
-                <ImageButton.Source>
-                    <FontImageSource Glyph="{x:Static f:FluentUI.settings_24_regular}"
-                                     FontFamily="{x:Static f:FluentUI.FontFamily}"
-                                     Color="{AppThemeBinding Light={StaticResource DarkOnLightBackground}, Dark={StaticResource LightOnDarkBackground}}"
-                                     Size="24" />
-                </ImageButton.Source>
-            </ImageButton>
+                <!-- Greeting, server status and settings -->
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                    <VerticalStackLayout Spacing="2">
+                        <Label Text="{Binding Greeting}" Style="{StaticResource Muted}" />
+                        <Label Text="¿Qué escuchamos?" Style="{StaticResource Title1}" />
+                    </VerticalStackLayout>
 
-            <Button Grid.RowSpan="2" Grid.Column="2"
-                    Text="Recargar"
-                    Style="{StaticResource OutlineButton}"
-                    VerticalOptions="Center"
-                    Command="{Binding RefreshCommand}"
-                    SemanticProperties.Hint="Vuelve a comprobar el servidor y cargar las emisoras" />
-        </Grid>
+                    <ImageButton Grid.Column="1"
+                                 Command="{Binding OpenSettingsCommand}"
+                                 WidthRequest="44" HeightRequest="44" Padding="10"
+                                 Background="Transparent" VerticalOptions="Start"
+                                 SemanticProperties.Description="Ajustes">
+                        <ImageButton.Source>
+                            <FontImageSource Glyph="{x:Static f:FluentUI.settings_24_regular}"
+                                             FontFamily="{x:Static f:FluentUI.FontFamily}"
+                                             Color="{AppThemeBinding Light={StaticResource DarkOnLightBackground}, Dark={StaticResource LightOnDarkBackground}}"
+                                             Size="24" />
+                        </ImageButton.Source>
+                    </ImageButton>
+                </Grid>
 
-        <!-- Búsqueda por nombre mientras se escribe: la resuelve la API consultando Radio Browser -->
-        <SearchBar Grid.Row="1"
-                   Placeholder="Buscar emisora por nombre"
-                   Text="{Binding SearchText}"
-                   SearchCommand="{Binding SearchCommand}"
-                   SemanticProperties.Hint="Escribe el nombre de una emisora; los resultados aparecen solos" />
-
-        <!-- Mensaje de error (servidor caído, Radio Browser no disponible...) -->
-        <Border Grid.Row="2" Style="{StaticResource CardStyle}" IsVisible="{Binding HasError}">
-            <Label Text="{Binding ErrorMessage}" Style="{StaticResource ErrorText}" />
-        </Border>
-
-        <Label Grid.Row="3" Text="{Binding ListTitle}" Style="{StaticResource Body1Strong}" />
-
-        <!-- Listado de emisoras -->
-        <CollectionView Grid.Row="4"
-                        ItemsSource="{Binding Stations}"
-                        SelectionMode="None">
-            <CollectionView.ItemsLayout>
-                <LinearItemsLayout Orientation="Vertical" ItemSpacing="8" />
-            </CollectionView.ItemsLayout>
-
-            <!-- Lista vacía: búsqueda sin resultados -->
-            <CollectionView.EmptyView>
-                <VerticalStackLayout Padding="0,40" Spacing="8" HorizontalOptions="Center" MaximumWidthRequest="360">
-                    <Label Text="{Binding EmptyMessage}" Style="{StaticResource Muted}" HorizontalTextAlignment="Center" />
-                </VerticalStackLayout>
-            </CollectionView.EmptyView>
-
-            <CollectionView.ItemTemplate>
-                <DataTemplate x:DataType="vm:StationItemViewModel">
-                    <Border Style="{StaticResource CardStyle}"
-                            SemanticProperties.Description="{Binding Name}">
-                        <Border.Triggers>
-                            <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
-                                <!-- Se cambian propiedades sueltas (no el Style entero): así se restauran bien al deseleccionar -->
-                                <Setter Property="StrokeThickness" Value="2" />
-                                <Setter Property="Stroke" Value="{DynamicResource Primary}" />
-                                <Setter Property="Background" Value="{DynamicResource PrimarySoft}" />
-                            </DataTrigger>
-                        </Border.Triggers>
-                        <Border.GestureRecognizers>
-                            <TapGestureRecognizer
-                                Command="{Binding SelectStationCommand, Source={RelativeSource AncestorType={x:Type vm:HomeViewModel}}, x:DataType=vm:HomeViewModel}"
-                                CommandParameter="{Binding .}" />
-                        </Border.GestureRecognizers>
-
-                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
-                            <!-- Logo de la emisora; si no tiene, la inicial sobre fondo verde -->
-                            <controls:StationLogoView WidthRequest="48" HeightRequest="48" Source="{Binding FaviconUrl}" Initial="{Binding Initial}" />
-
-                            <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
-                                <Label Text="{Binding Name}" Style="{StaticResource Body1Strong}" LineBreakMode="TailTruncation" />
-                                <Label Text="{Binding Subtitle}" Style="{StaticResource Muted}" LineBreakMode="TailTruncation" />
-                            </VerticalStackLayout>
-
-                            <Label Grid.Column="2"
-                                   Text="Sonando"
-                                   IsVisible="{Binding IsPlaying}"
-                                   FontSize="13" FontAttributes="Bold"
-                                   TextColor="{DynamicResource PrimaryText}"
-                                   VerticalOptions="Center" />
-                        </Grid>
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                    <Border Style="{StaticResource ChipStyle}">
+                        <HorizontalStackLayout Spacing="6">
+                            <Ellipse WidthRequest="8" HeightRequest="8" VerticalOptions="Center"
+                                     Fill="{StaticResource Gray400}">
+                                <Ellipse.Triggers>
+                                    <DataTrigger TargetType="Ellipse" Binding="{Binding IsServerOk}" Value="True">
+                                        <Setter Property="Fill" Value="{StaticResource Online}" />
+                                    </DataTrigger>
+                                    <DataTrigger TargetType="Ellipse" Binding="{Binding IsServerDown}" Value="True">
+                                        <Setter Property="Fill" Value="{StaticResource Error}" />
+                                    </DataTrigger>
+                                </Ellipse.Triggers>
+                            </Ellipse>
+                            <Label Text="{Binding ServerStatusText}" Style="{StaticResource Muted}" FontSize="13" />
+                        </HorizontalStackLayout>
                     </Border>
-                </DataTemplate>
-            </CollectionView.ItemTemplate>
-        </CollectionView>
 
-        <ActivityIndicator Grid.Row="4"
-                           IsRunning="{Binding IsLoading}"
-                           IsVisible="{Binding IsLoading}"
-                           HorizontalOptions="Center" VerticalOptions="Center"
-                           Color="{DynamicResource Primary}" />
+                    <Button Grid.Column="1" Text="Recargar" Style="{StaticResource OutlineButton}"
+                            Command="{Binding RefreshCommand}"
+                            SemanticProperties.Hint="Vuelve a comprobar el servidor y cargar las emisoras" />
+                </Grid>
+
+                <!-- Search by name while typing: the API resolves it by asking Radio Browser -->
+                <SearchBar Placeholder="Buscar emisora por nombre"
+                           Text="{Binding SearchText}"
+                           SearchCommand="{Binding SearchCommand}"
+                           SemanticProperties.Hint="Escribe el nombre de una emisora; los resultados aparecen solos" />
+
+                <!-- Scope: Spain or the world -->
+                <Border Style="{StaticResource SegmentedStyle}">
+                    <FlexLayout BindableLayout.ItemsSource="{Binding Scopes}" JustifyContent="SpaceEvenly">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="vm:FilterOptionViewModel">
+                                <Border Style="{StaticResource SegmentStyle}" FlexLayout.Grow="1"
+                                        SemanticProperties.Description="{Binding Name}">
+                                    <Border.Triggers>
+                                        <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
+                                            <Setter Property="Background" Value="{DynamicResource PrimaryBrush}" />
+                                        </DataTrigger>
+                                    </Border.Triggers>
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer
+                                            Command="{Binding SelectScopeCommand, Source={RelativeSource AncestorType={x:Type vm:HomeViewModel}}, x:DataType=vm:HomeViewModel}"
+                                            CommandParameter="{Binding .}" />
+                                    </Border.GestureRecognizers>
+                                    <Label Text="{Binding Name}" HorizontalTextAlignment="Center" FontSize="15">
+                                        <Label.Triggers>
+                                            <DataTrigger TargetType="Label" Binding="{Binding IsSelected}" Value="True">
+                                                <Setter Property="TextColor" Value="{DynamicResource OnPrimary}" />
+                                                <Setter Property="FontAttributes" Value="Bold" />
+                                            </DataTrigger>
+                                        </Label.Triggers>
+                                    </Label>
+                                </Border>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </FlexLayout>
+                </Border>
+
+                <!-- Categories: one row that scrolls sideways -->
+                <ScrollView Orientation="Horizontal" HorizontalScrollBarVisibility="Never">
+                    <HorizontalStackLayout BindableLayout.ItemsSource="{Binding Categories}" Spacing="8">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="vm:FilterOptionViewModel">
+                                <Border Style="{StaticResource FilterChipStyle}"
+                                        SemanticProperties.Description="{Binding Name}">
+                                    <Border.Triggers>
+                                        <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
+                                            <Setter Property="Background" Value="{AppThemeBinding Light={StaticResource ChipSelectedLight}, Dark={StaticResource ChipSelectedDark}}" />
+                                        </DataTrigger>
+                                    </Border.Triggers>
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer
+                                            Command="{Binding SelectCategoryCommand, Source={RelativeSource AncestorType={x:Type vm:HomeViewModel}}, x:DataType=vm:HomeViewModel}"
+                                            CommandParameter="{Binding .}" />
+                                    </Border.GestureRecognizers>
+                                    <Label Text="{Binding Name}" FontSize="15" VerticalOptions="Center">
+                                        <Label.Triggers>
+                                            <DataTrigger TargetType="Label" Binding="{Binding IsSelected}" Value="True">
+                                                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource ChipSelectedTextLight}, Dark={StaticResource ChipSelectedTextDark}}" />
+                                                <Setter Property="FontAttributes" Value="Bold" />
+                                            </DataTrigger>
+                                        </Label.Triggers>
+                                    </Label>
+                                </Border>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </HorizontalStackLayout>
+                </ScrollView>
+
+                <!-- Error (server down, Radio Browser not available...) -->
+                <Border Style="{StaticResource CardStyle}" IsVisible="{Binding HasError}">
+                    <Label Text="{Binding ErrorMessage}" Style="{StaticResource ErrorText}" />
+                </Border>
+
+                <!-- List title, result count and reset -->
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8" Margin="0,8,0,0">
+                    <VerticalStackLayout Spacing="2">
+                        <Label Text="{Binding ListTitle}" Style="{StaticResource Title2}" LineBreakMode="TailTruncation" />
+                        <Label Text="{Binding ListSubtitle}" Style="{StaticResource Muted}" FontSize="13" />
+                    </VerticalStackLayout>
+                    <Button Grid.Column="1" Text="Restablecer" Style="{StaticResource OutlineButton}"
+                            VerticalOptions="Center" IsVisible="{Binding HasActiveFilters}"
+                            Command="{Binding ResetFiltersCommand}" />
+                </Grid>
+
+                <!-- Sort order: a row that opens the list of options (a Picker shows its title instead of the value on Android) -->
+                <Border Style="{StaticResource SegmentedStyle}" Padding="16,0" HeightRequest="48"
+                        SemanticProperties.Description="Cambiar el orden de la lista">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding ChooseSortCommand}" />
+                    </Border.GestureRecognizers>
+                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                        <Label Text="Ordenar por" Style="{StaticResource Muted}" VerticalOptions="Center" />
+                        <Label Grid.Column="1" Text="{Binding SelectedSort.Name}" FontAttributes="Bold" FontSize="15"
+                               HorizontalTextAlignment="End" VerticalOptions="Center" LineBreakMode="TailTruncation" />
+                        <Label Grid.Column="2" Text="{x:Static f:FluentUI.chevron_down_20_regular}"
+                               FontFamily="{x:Static f:FluentUI.FontFamily}" FontSize="20" VerticalOptions="Center"
+                               TextColor="{AppThemeBinding Light={StaticResource MutedTextLight}, Dark={StaticResource MutedTextDark}}" />
+                    </Grid>
+                </Border>            </VerticalStackLayout>
+        </CollectionView.Header>
+
+        <!-- Empty list: search or filters without results -->
+        <CollectionView.EmptyView>
+            <VerticalStackLayout Padding="0,40" Spacing="8" HorizontalOptions="Center" MaximumWidthRequest="360">
+                <Label Text="{Binding EmptyMessage}" Style="{StaticResource Muted}" HorizontalTextAlignment="Center" />
+            </VerticalStackLayout>
+        </CollectionView.EmptyView>
+
+        <CollectionView.ItemTemplate>
+            <DataTemplate x:DataType="vm:StationItemViewModel">
+                <Border Style="{StaticResource CardStyle}" SemanticProperties.Description="{Binding Name}">
+                    <Border.Triggers>
+                        <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
+                            <!-- Single properties are changed (not the whole Style) so they are restored when deselected -->
+                            <Setter Property="StrokeThickness" Value="2" />
+                            <Setter Property="Stroke" Value="{DynamicResource Primary}" />
+                            <Setter Property="Background" Value="{DynamicResource PrimarySoft}" />
+                        </DataTrigger>
+                    </Border.Triggers>
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer
+                            Command="{Binding SelectStationCommand, Source={RelativeSource AncestorType={x:Type vm:HomeViewModel}}, x:DataType=vm:HomeViewModel}"
+                            CommandParameter="{Binding .}" />
+                    </Border.GestureRecognizers>
+
+                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                        <!-- Station logo; the initial on the accent color if it has none -->
+                        <controls:StationLogoView WidthRequest="48" HeightRequest="48" Source="{Binding FaviconUrl}" Initial="{Binding Initial}" />
+
+                        <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
+                            <Label Text="{Binding Name}" Style="{StaticResource Body1Strong}" LineBreakMode="TailTruncation" />
+                            <Label Text="{Binding Subtitle}" Style="{StaticResource Muted}" LineBreakMode="TailTruncation" />
+                        </VerticalStackLayout>
+
+                        <Label Grid.Column="2" Text="Sonando" IsVisible="{Binding IsPlaying}"
+                               FontSize="13" FontAttributes="Bold" TextColor="{DynamicResource PrimaryText}"
+                               VerticalOptions="Center" />
+                    </Grid>
+                </Border>
+            </DataTemplate>
+        </CollectionView.ItemTemplate>
+      </CollectionView>
+
+      <ActivityIndicator IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}"
+                         HorizontalOptions="Center" VerticalOptions="End" Margin="0,0,0,24"
+                         Color="{DynamicResource Primary}" />
     </Grid>
 
-    <!-- Mini reproductor (su BindingContext lo pone el código de la página) -->
+    <!-- Mini player (its BindingContext is set by the page code) -->
     <controls:MiniPlayerView x:Name="MiniPlayer" Grid.Row="1" />
   </Grid>
 </ContentPage>

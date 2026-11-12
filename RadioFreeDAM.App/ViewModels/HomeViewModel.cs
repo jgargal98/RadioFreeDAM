@@ -5,8 +5,8 @@ using CommunityToolkit.Mvvm.Input;
 namespace RadioFreeDAM.ViewModels;
 
 /// <summary>
-/// Pantalla de Inicio: comprueba el servidor, carga las emisoras populares, busca por nombre
-/// y permite elegir una emisora.
+/// Home screen: checks the server, loads the station list (filtered by scope, category and sort order),
+/// searches by name and lets the user pick a station or a network.
 /// </summary>
 public partial class HomeViewModel : ObservableObject
 {
@@ -17,34 +17,162 @@ public partial class HomeViewModel : ObservableObject
     private readonly IStationApiService _stationApiService;
     private readonly IPlayerService _playerService;
     private readonly INavigationService _navigationService;
+    private readonly ISessionService _session;
+    private readonly IDialogService _dialogService;
     private bool _isInitialized;
 
-    /// <summary>Texto de la búsqueda cuyos resultados se muestran; null si se muestran las populares.</summary>
-    private string? _activeSearch;
+    /// <summary>Search text of the list being shown (at least 2 characters), or null when there is no search.</summary>
+    private string? _query;
+
+    private string _scope = CatalogFilters.ScopeSpain;
+    private string _category = CatalogFilters.AllCategories;
+    private string _sort = CatalogFilters.SortClicks;
+
+    /// <summary>True while ResetFilters changes the sort itself, so the change does not start its own load.</summary>
+    private bool _resetting;
 
     private CancellationTokenSource? _searchDelayCts;
 
-    /// <summary>Número de la última carga pedida; las respuestas de cargas anteriores se ignoran.</summary>
+    /// <summary>Number of the last load requested; answers of older loads are ignored.</summary>
     private int _requestVersion;
 
     public HomeViewModel(
         IApiStatusService apiStatusService,
         IStationApiService stationApiService,
         IPlayerService playerService,
-        INavigationService navigationService)
+        INavigationService navigationService,
+        ISessionService session,
+        IDialogService dialogService)
     {
         _apiStatusService = apiStatusService;
         _stationApiService = stationApiService;
         _playerService = playerService;
         _navigationService = navigationService;
+        _session = session;
+        _dialogService = dialogService;
+
+        Scopes = [.. CatalogFilters.Scopes.Select(o => new FilterOptionViewModel(o))];
+        Categories = [.. CatalogFilters.Categories.Select(o => new FilterOptionViewModel(o))];
+        SortOptions = [.. CatalogFilters.Sorts];
+        SelectedSort = SortOptions[0];
+        UpdateSelections();
 
         _playerService.StateChanged += (_, _) => RefreshPlaybackMarks();
+        _session.SessionChanged += (_, _) => OnPropertyChanged(nameof(Greeting));
     }
 
     public ObservableCollection<StationItemViewModel> Stations { get; } = [];
 
+    // ---------- Greeting ----------
+
+    /// <summary>"Buenas tardes, Juan" (or just the salutation without a session).</summary>
+    public string Greeting
+    {
+        get
+        {
+            var hour = DateTime.Now.Hour;
+            var salutation = hour switch { < 6 => "Buenas noches", < 14 => "Buenos días", < 21 => "Buenas tardes", _ => "Buenas noches" };
+            return _session.CurrentUser is { } user ? $"{salutation}, {user.Name.Split(' ')[0]}" : salutation;
+        }
+    }
+
+    // ---------- Filters ----------
+
+    public IReadOnlyList<FilterOptionViewModel> Scopes { get; }
+
+    public IReadOnlyList<FilterOptionViewModel> Categories { get; }
+
+    // A concrete list: Picker.ItemsSource needs an IList, which IReadOnlyList does not guarantee.
+    public List<FilterOption> SortOptions { get; }
+
+    /// <summary>Bound to the sort picker. Changing it reloads the list.</summary>
+    // Nullable on purpose: a Picker sets SelectedItem to null while it is being built or rebuilt.
+    // The sort actually used is always _sort, which never becomes null.
     [ObservableProperty]
-    public partial string ListTitle { get; set; } = "Populares en España";
+    public partial FilterOption? SelectedSort { get; set; }
+
+    [ObservableProperty]
+    public partial bool HasActiveFilters { get; set; }
+
+    [RelayCommand]
+    private async Task SelectScopeAsync(FilterOptionViewModel option)
+    {
+        if (option.Id == _scope)
+            return;
+
+        _scope = option.Id;
+        await ApplyFiltersAsync();
+    }
+
+    [RelayCommand]
+    private async Task SelectCategoryAsync(FilterOptionViewModel option)
+    {
+        if (option.Id == _category)
+            return;
+
+        _category = option.Id;
+        await ApplyFiltersAsync();
+    }
+
+    partial void OnSelectedSortChanged(FilterOption? value)
+    {
+        // The picker sends null while it is built and a real option when the user chooses one.
+        if (value is null || value.Id == _sort)
+            return;
+
+        _sort = value.Id;
+        if (!_resetting)
+            _ = ApplyFiltersAsync();
+    }
+
+    /// <summary>Opens the list of sort options.</summary>
+    [RelayCommand]
+    private async Task ChooseSortAsync()
+    {
+        var chosen = await _dialogService.ChooseAsync("Ordenar por", [.. SortOptions.Select(o => o.Name)]);
+        var option = SortOptions.FirstOrDefault(o => o.Name == chosen);
+        if (option is not null)
+            SelectedSort = option;
+    }
+
+    [RelayCommand]
+    private async Task ResetFiltersAsync()
+    {
+        _scope = CatalogFilters.ScopeSpain;
+        _category = CatalogFilters.AllCategories;
+        _resetting = true;
+        _sort = CatalogFilters.SortClicks;
+        SelectedSort = SortOptions[0];
+        _resetting = false;
+        await ApplyFiltersAsync();
+    }
+
+    private Task ApplyFiltersAsync()
+    {
+        UpdateSelections();
+        return LoadAsync();
+    }
+
+    private void UpdateSelections()
+    {
+        foreach (var option in Scopes)
+            option.IsSelected = option.Id == _scope;
+        foreach (var option in Categories)
+            option.IsSelected = option.Id == _category;
+
+        HasActiveFilters = CurrentFilter.HasActiveFilters;
+    }
+
+    private CatalogFilter CurrentFilter => new(_query, _scope, _category, _sort);
+
+    // ---------- State ----------
+
+    [ObservableProperty]
+    public partial string ListTitle { get; set; } = "Top España";
+
+    /// <summary>Second line of the list header: how it is sorted and how many rows there are.</summary>
+    [ObservableProperty]
+    public partial string ListSubtitle { get; set; } = string.Empty;
 
     [ObservableProperty]
     public partial string SearchText { get; set; } = string.Empty;
@@ -55,14 +183,14 @@ public partial class HomeViewModel : ObservableObject
 
     public bool HasError => !string.IsNullOrEmpty(ErrorMessage);
 
-    /// <summary>Texto cuando la lista queda vacía (por ejemplo, una búsqueda sin resultados).</summary>
+    /// <summary>Text shown when the list is empty (for example a search without results).</summary>
     [ObservableProperty]
     public partial string? EmptyMessage { get; set; }
 
     [ObservableProperty]
     public partial bool IsLoading { get; set; }
 
-    /// <summary>null = aún no comprobado; true/false = resultado de la última comprobación.</summary>
+    /// <summary>null = not checked yet; true/false = result of the last check.</summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ServerStatusText), nameof(IsServerOk), nameof(IsServerDown))]
     public partial bool? IsServerOnline { get; set; }
@@ -78,7 +206,7 @@ public partial class HomeViewModel : ObservableObject
         null => "Comprobando servidor…"
     };
 
-    /// <summary>Se llama al mostrar la pantalla; solo carga la primera vez.</summary>
+    /// <summary>Called when the screen appears; only loads the first time.</summary>
     public async Task InitializeAsync()
     {
         if (_isInitialized)
@@ -88,7 +216,7 @@ public partial class HomeViewModel : ObservableObject
         await RefreshAsync();
     }
 
-    /// <summary>Botón Recargar: vuelve a comprobar el servidor y repite la última carga.</summary>
+    /// <summary>Reload button: checks the server again and repeats the last load.</summary>
     [RelayCommand]
     private async Task RefreshAsync()
     {
@@ -103,13 +231,12 @@ public partial class HomeViewModel : ObservableObject
             return;
         }
 
-        if (_activeSearch is null)
-            await LoadTopStationsAsync();
-        else
-            await LoadSearchAsync(_activeSearch);
+        await LoadAsync();
     }
 
-    /// <summary>Al pulsar Buscar (Enter): busca ya, sin esperar.</summary>
+    // ---------- Search ----------
+
+    /// <summary>On Search (Enter): searches right away, without waiting.</summary>
     [RelayCommand]
     private async Task SearchAsync()
     {
@@ -118,8 +245,8 @@ public partial class HomeViewModel : ObservableObject
     }
 
     /// <summary>
-    /// Búsqueda mientras se escribe: espera medio segundo sin cambios en el texto antes de buscar,
-    /// para no lanzar una petición por cada letra.
+    /// Search while typing: waits half a second without changes in the text before searching,
+    /// so a request is not sent for every letter.
     /// </summary>
     partial void OnSearchTextChanged(string value)
     {
@@ -135,55 +262,48 @@ public partial class HomeViewModel : ObservableObject
 
     private async Task SearchNowAsync(string text)
     {
-        if (text.Length == 0)
-        {
-            // Búsqueda borrada: vuelven las populares.
-            if (_activeSearch is not null || Stations.Count == 0)
-                await LoadTopStationsAsync();
-            return;
-        }
-
-        // Con una sola letra todavía no se busca (la API exige al menos 2).
-        if (text.Length < MinSearchLength || text == _activeSearch)
+        // With a single letter it does not search yet (the API requires at least 2).
+        if (text.Length == 1)
             return;
 
-        await LoadSearchAsync(text);
+        var query = text.Length >= MinSearchLength ? text : null;
+        if (query == _query && Stations.Count > 0)
+            return;
+
+        _query = query;
+        await LoadAsync();
     }
 
-    [RelayCommand]
-    private Task LoadTopStationsAsync() =>
-        LoadStationsAsync(_stationApiService.GetTopStationsAsync, search: null, title: "Populares en España");
-
-    private Task LoadSearchAsync(string text) =>
-        LoadStationsAsync(() => _stationApiService.SearchAsync(text), search: text, title: $"Resultados de «{text}»");
+    // ---------- Loading ----------
 
     /// <summary>
-    /// Carga una lista de emisoras. Si mientras tanto empieza otra carga (el usuario sigue escribiendo),
-    /// el resultado de esta se descarta: siempre se muestra la última búsqueda.
+    /// Loads the list for the current search and filters. If another load starts meanwhile
+    /// (the user keeps typing or changes a filter), the result of this one is discarded.
     /// </summary>
-    private async Task LoadStationsAsync(Func<Task<IReadOnlyList<CatalogEntryDto>>> fetch, string? search, string title)
+    private async Task LoadAsync()
     {
         var request = ++_requestVersion;
+        var filter = CurrentFilter;
         IsLoading = true;
         ErrorMessage = null;
         EmptyMessage = null;
 
         try
         {
-            var entries = await fetch();
+            var entries = await _stationApiService.GetCatalogAsync(filter);
             if (request != _requestVersion)
                 return;
 
             IsServerOnline = true;
-            _activeSearch = search;
-            ListTitle = title;
             Stations.Clear();
             foreach (var entry in entries)
                 Stations.Add(new StationItemViewModel(entry));
 
-            EmptyMessage = search is null
-                ? "La API no ha devuelto ninguna emisora."
-                : $"No hay emisoras que coincidan con «{search}». Prueba con otro nombre.";
+            ListTitle = BuildTitle(filter);
+            ListSubtitle = BuildSubtitle(filter, entries.Count);
+            EmptyMessage = filter.Name is not null
+                ? $"No hay emisoras que coincidan con «{filter.Name}». Prueba con otro nombre o cambia los filtros."
+                : "No hay emisoras con estos filtros. Prueba con otra categoría o con Mundo.";
 
             RefreshPlaybackMarks();
         }
@@ -200,14 +320,33 @@ public partial class HomeViewModel : ObservableObject
         }
     }
 
-    /// <summary>Engranaje de la cabecera.</summary>
+    private static string BuildTitle(CatalogFilter filter)
+    {
+        var scope = filter.Scope == CatalogFilters.ScopeSpain ? "España" : "Mundo";
+        var title = filter.Name is null ? $"Top {scope}" : $"Resultados de «{filter.Name}»";
+
+        if (filter.Category != CatalogFilters.AllCategories)
+            title += $" · {CatalogFilters.Categories.First(c => c.Id == filter.Category).Name}";
+
+        return title;
+    }
+
+    private static string BuildSubtitle(CatalogFilter filter, int rows)
+    {
+        var sort = CatalogFilters.Sorts.First(s => s.Id == filter.Sort).Name;
+        return rows == 0 ? sort : $"{rows} resultados · {sort}";
+    }
+
+    // ---------- Navigation ----------
+
+    /// <summary>Gear of the header.</summary>
     [RelayCommand]
     private Task OpenSettingsAsync() => _navigationService.GoToSettingsAsync();
 
     [RelayCommand]
     private async Task SelectStationAsync(StationItemViewModel item)
     {
-        // Una cadena abre la lista de sus emisoras para elegir ciudad; una emisora va al Reproductor.
+        // A network opens the list of its stations to choose a city; a station goes to the Player.
         if (item.Network is { } network)
         {
             await _navigationService.GoToNetworkAsync(network);

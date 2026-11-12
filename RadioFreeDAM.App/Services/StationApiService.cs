@@ -4,10 +4,18 @@ namespace RadioFreeDAM.Services;
 
 public class StationApiService(HttpClient httpClient) : IStationApiService
 {
-    public Task<IReadOnlyList<CatalogEntryDto>> GetTopStationsAsync() => GetAsync<CatalogEntryDto>("api/catalog");
+    public Task<IReadOnlyList<CatalogEntryDto>> GetCatalogAsync(CatalogFilter filter)
+    {
+        // Every filter is sent explicitly so the request does not depend on the API's defaults.
+        var url = $"api/catalog?scope={Uri.EscapeDataString(filter.Scope)}" +
+                  $"&category={Uri.EscapeDataString(filter.Category)}" +
+                  $"&sort={Uri.EscapeDataString(filter.Sort)}";
 
-    public Task<IReadOnlyList<CatalogEntryDto>> SearchAsync(string name) =>
-        GetAsync<CatalogEntryDto>($"api/catalog?name={Uri.EscapeDataString(name)}");
+        if (!string.IsNullOrWhiteSpace(filter.Name))
+            url += $"&name={Uri.EscapeDataString(filter.Name)}";
+
+        return GetAsync<CatalogEntryDto>(url);
+    }
 
     public Task<IReadOnlyList<StationDto>> GetNetworkStationsAsync(string networkId) =>
         GetAsync<StationDto>($"api/networks/{Uri.EscapeDataString(networkId)}/stations");

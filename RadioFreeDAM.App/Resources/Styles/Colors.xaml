@@ -14,6 +14,14 @@
     <Color x:Key="PrimaryText">#127A39</Color>      <!-- Acento usado como texto sobre el fondo -->
     <Color x:Key="PrimarySoft">#DDF5E5</Color>      <!-- Fondo suave (emisora seleccionada) -->
 
+    <!-- Filter chips: neutral when idle, inverted (dark on light theme, light on dark theme) when selected -->
+    <Color x:Key="ChipLight">#E7E8EC</Color>
+    <Color x:Key="ChipDark">#22262E</Color>
+    <Color x:Key="ChipSelectedLight">#14161B</Color>
+    <Color x:Key="ChipSelectedDark">#F2F3F5</Color>
+    <Color x:Key="ChipSelectedTextLight">#FFFFFF</Color>
+    <Color x:Key="ChipSelectedTextDark">#0F1115</Color>
+
     <!-- Colores con significado: no cambian con el acento -->
     <Color x:Key="Online">#1DB954</Color>
     <Color x:Key="Error">#D93025</Color>
