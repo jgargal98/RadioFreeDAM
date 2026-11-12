@@ -5,7 +5,9 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:views="clr-namespace:RadioFreeDAM.Views"
     xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
-    Shell.FlyoutBehavior="Disabled"
+    Shell.FlyoutBehavior="{OnPlatform WinUI=Locked, Default=Disabled}"
+    Shell.FlyoutWidth="220"
+    FlyoutBackground="{AppThemeBinding Light={StaticResource LightSecondaryBackground}, Dark={StaticResource DarkSecondaryBackground}}"
     Title="RadioFreeDAM">
 
     <!-- Barra de estado del móvil del mismo color que la app, con iconos legibles en cada tema -->
@@ -15,8 +17,8 @@
             StatusBarStyle="{AppThemeBinding Light=DarkContent, Dark=LightContent}" />
     </Shell.Behaviors>
 
-    <!-- Navegación por pestañas inferiores: tres secciones siempre a un toque. -->
-    <TabBar>
+    <!-- Same three sections everywhere: bottom tabs on a phone, side bar on Windows (the flyout shows each one as an item). -->
+    <FlyoutItem FlyoutDisplayOptions="AsMultipleItems" Shell.TabBarIsVisible="{OnPlatform WinUI=False, Default=True}">
         <ShellContent
             Title="Inicio"
             Icon="{StaticResource IconHome}"
@@ -40,6 +42,6 @@
             Route="favorites"
             SemanticProperties.Description="Favoritos"
             SemanticProperties.Hint="Ver tus emisoras favoritas" />
-    </TabBar>
+    </FlyoutItem>
 
 </Shell>

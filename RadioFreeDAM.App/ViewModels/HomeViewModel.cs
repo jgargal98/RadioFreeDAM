@@ -18,6 +18,7 @@ public partial class HomeViewModel : ObservableObject
     private readonly IPlayerService _playerService;
     private readonly INavigationService _navigationService;
     private readonly IDialogService _dialogService;
+    private readonly IStationColorService _stationColors;
     private bool _isInitialized;
 
     /// <summary>Search text of the list being shown (at least 2 characters), or null when there is no search.</summary>
@@ -37,15 +38,20 @@ public partial class HomeViewModel : ObservableObject
         IStationApiService stationApiService,
         IPlayerService playerService,
         INavigationService navigationService,
-        IDialogService dialogService)
+        IDialogService dialogService,
+        IStationColorService stationColors,
+        IAccentService accent)
     {
         _apiStatusService = apiStatusService;
         _stationApiService = stationApiService;
         _playerService = playerService;
         _navigationService = navigationService;
         _dialogService = dialogService;
+        _stationColors = stationColors;
 
         UpdateFilterTexts();
+        // The accent service also fires when the theme changes: the tinted cards follow it.
+        accent.AccentChanged += (_, _) => { foreach (var item in Stations) item.RefreshColors(); };
         _playerService.StateChanged += (_, _) => RefreshPlaybackMarks();
     }
 
@@ -244,6 +250,7 @@ public partial class HomeViewModel : ObservableObject
                 : "No hay emisoras con estos filtros. Prueba con otra categoría o con Mundo.";
 
             RefreshPlaybackMarks();
+            _ = LoadCardColorsAsync(request);
         }
         catch (Exception ex) when (request == _requestVersion && ApiException.IsCommunicationError(ex))
         {
@@ -256,6 +263,33 @@ public partial class HomeViewModel : ObservableObject
             if (request == _requestVersion)
                 IsLoading = false;
         }
+    }
+
+    /// <summary>
+    /// Takes the color of each logo in the background. Cards start with a color from their name and change when
+    /// the logo color arrives. A few at a time, and the result is dropped if the list has been reloaded meanwhile.
+    /// </summary>
+    private async Task LoadCardColorsAsync(int request)
+    {
+        using var limit = new SemaphoreSlim(4);
+        var items = Stations.ToList();
+
+        await Task.WhenAll(items.Select(async item =>
+        {
+            await limit.WaitAsync();
+            try
+            {
+                // The color service works with stations: a network is represented by its logo.
+                var source = item.Station ?? new StationDto { Id = "network:" + item.Network!.Id, FaviconUrl = item.Network.FaviconUrl };
+                var color = await _stationColors.GetAccentColorAsync(source);
+                if (color is not null && request == _requestVersion)
+                    item.SetLogoColor(color);
+            }
+            finally
+            {
+                limit.Release();
+            }
+        }));
     }
 
     private static string BuildSummary(CatalogFilter filter, int rows)

@@ -22,6 +22,10 @@ public class StationLogoView : ContentView
         nameof(InitialFontSize), typeof(double), typeof(StationLogoView), 22d,
         propertyChanged: (view, _, value) => ((StationLogoView)view)._initial.FontSize = (double)value);
 
+    public static readonly BindableProperty FallbackColorProperty = BindableProperty.Create(
+        nameof(FallbackColor), typeof(Color), typeof(StationLogoView), null,
+        propertyChanged: (view, _, value) => ((StationLogoView)view).UpdateFallbackColor((Color?)value));
+
     private readonly Border _avatar;
     private readonly Label _initial;
     private readonly Border _logo;
@@ -60,6 +64,22 @@ public class StationLogoView : ContentView
 
         Content = new Grid { Children = { _avatar, _logo } };
         UpdateShape();
+    }
+
+    /// <summary>Color of the avatar when there is no logo. Null uses the accent color of the app.</summary>
+    public Color? FallbackColor
+    {
+        get => (Color?)GetValue(FallbackColorProperty);
+        set => SetValue(FallbackColorProperty, value);
+    }
+
+    private void UpdateFallbackColor(Color? color)
+    {
+        if (color is null)
+            return;
+
+        _avatar.Background = new SolidColorBrush(color);
+        _initial.TextColor = AccentPalette.OnFill(color);
     }
 
     public string? Source

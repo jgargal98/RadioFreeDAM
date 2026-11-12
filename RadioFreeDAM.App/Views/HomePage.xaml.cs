@@ -9,6 +9,7 @@ public partial class HomePage : ContentPage
         InitializeComponent();
         BindingContext = _viewModel = viewModel;
         MiniPlayer.BindingContext = playerViewModel;
+        NowPlaying.BindingContext = playerViewModel;
     }
 
     protected override async void OnAppearing()

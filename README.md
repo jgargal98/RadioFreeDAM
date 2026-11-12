@@ -147,4 +147,10 @@ dotnet tool run dotnet-ef migrations add NombreDelCambio --project RadioFreeDAM.
   - **Recordar la sesión** (casilla «Mantener la sesión iniciada»; token en SecureStorage, validado con `api/auth/me`).
   - **Búsqueda mientras se escribe** con mensaje de «sin resultados».
   - Reintentos automáticos ante cortes de red (app → API y API → Radio Browser) y pruebas automáticas de la API.
+- [x] **Diseño y catálogo** · Mejoras posteriores:
+  - **Catálogo agrupado por cadenas** (`GET api/catalog`, `GET api/networks/{id}/stations`): COPE, SER, etc. aparecen como una sola tarjeta y se elige la emisora de cada ciudad.
+  - **Filtros** en Inicio como menús desplegables, con los parámetros `scope` (`spain`, `world`), `category` (noticias, música, deporte, pop, rock...) y `sort` (`clicks`, `trend`, `votes`, `name`, `bitrate`).
+  - **Tarjetas de color**: cada emisora tiñe su tarjeta con el color dominante de su logo.
+  - **Interfaz adaptable**: en móvil, pestañas inferiores y mini reproductor; en PC, barra lateral fija, rejilla de 4 columnas y panel de reproducción a la derecha.
+  - **Ajustes**: tema (sistema, claro, oscuro), color de acento (de la emisora, fijo o a elegir) y sesión.
 - [ ] **Entrega** · Vídeo de demostración (3 de diciembre).

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+    Now-playing panel of the desktop layout: sits at the right of the list, so the station that is playing
+    is always in view. Uses the same PlayerViewModel as the Player page and the mini player.
+-->
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:f="clr-namespace:Fonts"
+             xmlns:vm="clr-namespace:RadioFreeDAM.ViewModels"
+             xmlns:controls="clr-namespace:RadioFreeDAM.Views.Controls"
+             x:Class="RadioFreeDAM.Views.Controls.NowPlayingPanelView"
+             x:DataType="vm:PlayerViewModel">
+
+    <Border Style="{StaticResource CardStyle}" Padding="24" Background="{Binding PlayerBackground}">
+        <Grid>
+
+            <!-- No station chosen yet -->
+            <VerticalStackLayout IsVisible="{Binding HasStation, Converter={StaticResource InvertedBoolConverter}}"
+                                 VerticalOptions="Center" Spacing="8">
+                <Label Text="Nada sonando" Style="{StaticResource Title2}" HorizontalTextAlignment="Center" />
+                <Label Text="Elige una emisora de la lista para escucharla." Style="{StaticResource Muted}"
+                       HorizontalTextAlignment="Center" />
+            </VerticalStackLayout>
+
+            <!-- Station chosen -->
+            <VerticalStackLayout IsVisible="{Binding HasStation}" VerticalOptions="Center" Spacing="16">
+                <controls:StationLogoView WidthRequest="160" HeightRequest="160" HorizontalOptions="Center"
+                                          CornerRadius="28" InitialFontSize="64" LogoPadding="14"
+                                          Source="{Binding CurrentStation.FaviconUrl}" Initial="{Binding StationInitial}" />
+
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="{Binding CurrentStation.Name}" Style="{StaticResource Title2}" HorizontalTextAlignment="Center" />
+                    <Label Text="{Binding StationSubtitle}" Style="{StaticResource Muted}" HorizontalTextAlignment="Center" />
+                    <Label Text="{Binding StatusText}" Style="{StaticResource Body1Strong}" HorizontalTextAlignment="Center" />
+                </VerticalStackLayout>
+
+                <ImageButton Command="{Binding TogglePlaybackCommand}"
+                             WidthRequest="72" HeightRequest="72" CornerRadius="36" Padding="18"
+                             Background="{DynamicResource PrimaryBrush}" HorizontalOptions="Center"
+                             SemanticProperties.Description="{Binding ToggleButtonText}">
+                    <ImageButton.Source>
+                        <FontImageSource Glyph="{x:Static f:FluentUI.play_24_regular}"
+                                         FontFamily="{x:Static f:FluentUI.FontFamily}"
+                                         Color="{DynamicResource OnPrimary}" Size="36" />
+                    </ImageButton.Source>
+                    <ImageButton.Triggers>
+                        <DataTrigger TargetType="ImageButton" Binding="{Binding IsActive}" Value="True">
+                            <Setter Property="Source">
+                                <FontImageSource Glyph="{x:Static f:FluentUI.stop_24_regular}"
+                                                 FontFamily="{x:Static f:FluentUI.FontFamily}"
+                                                 Color="{DynamicResource OnPrimary}" Size="36" />
+                            </Setter>
+                        </DataTrigger>
+                    </ImageButton.Triggers>
+                </ImageButton>
+
+                <Button Text="{Binding FavoriteButtonText}" Command="{Binding ToggleFavoriteCommand}"
+                        Style="{StaticResource OutlineButton}" HorizontalOptions="Center" />
+                <Label Text="{Binding FavoriteErrorMessage}" IsVisible="{Binding HasFavoriteError}"
+                       Style="{StaticResource ErrorText}" HorizontalTextAlignment="Center" />
+            </VerticalStackLayout>
+        </Grid>
+    </Border>
+</ContentView>

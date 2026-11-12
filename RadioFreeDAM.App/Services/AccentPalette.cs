@@ -12,6 +12,10 @@ public static class AccentPalette
     public static readonly Color LightBackground = Color.FromArgb("#F5F5F7");
     public static readonly Color DarkBackground = Color.FromArgb("#121212");
 
+    /// <summary>Surface of the cards in each theme (the base the station color is mixed into).</summary>
+    public static readonly Color LightCard = Colors.White;
+    public static readonly Color DarkCard = Color.FromArgb("#1E1E1E");
+
     /// <summary>Color de un tono de la barra (0–360). Saturación y brillo fijos: cualquier tono se lee bien.</summary>
     public static Color FromHue(double hue) => Color.FromHsla(hue / 360, 0.65f, 0.48f);
 

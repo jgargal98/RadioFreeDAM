@@ -9,13 +9,22 @@
              Shell.NavBarIsVisible="False"
              Title="Inicio">
 
+  <Grid>
+    <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*" />
+        <!-- Panel column: only on a computer or a tablet; on a phone it has no width -->
+        <ColumnDefinition Width="{OnIdiom Phone=0, Default=360}" />
+    </Grid.ColumnDefinitions>
+
   <Grid RowDefinitions="*,Auto">
 
     <!-- Everything scrolls together: the header (greeting, search, filters) is the header of the list -->
     <Grid Padding="{StaticResource LayoutPadding}">
       <CollectionView ItemsSource="{Binding Stations}" SelectionMode="None">
+        <!-- Grid of cards: 2 columns on a phone, more on a tablet or a computer -->
         <CollectionView.ItemsLayout>
-            <LinearItemsLayout Orientation="Vertical" ItemSpacing="8" />
+            <GridItemsLayout Orientation="Vertical" Span="{OnIdiom Phone=2, Tablet=3, Desktop=4}"
+                             HorizontalItemSpacing="12" VerticalItemSpacing="12" />
         </CollectionView.ItemsLayout>
 
         <CollectionView.Header>
@@ -109,13 +118,15 @@
 
         <CollectionView.ItemTemplate>
             <DataTemplate x:DataType="vm:StationItemViewModel">
-                <Border Style="{StaticResource CardStyle}" SemanticProperties.Description="{Binding Name}">
+                <!-- Card tinted with the color of the station -->
+                <Border Style="{StaticResource CardStyle}" Background="{Binding CardBackground}"
+                        HeightRequest="136" Padding="14"
+                        SemanticProperties.Description="{Binding Name}">
                     <Border.Triggers>
                         <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
                             <!-- Single properties are changed (not the whole Style) so they are restored when deselected -->
                             <Setter Property="StrokeThickness" Value="2" />
-                            <Setter Property="Stroke" Value="{DynamicResource Primary}" />
-                            <Setter Property="Background" Value="{DynamicResource PrimarySoft}" />
+                            <Setter Property="Stroke" Value="{Binding CardAccent}" />
                         </DataTrigger>
                     </Border.Triggers>
                     <Border.GestureRecognizers>
@@ -124,18 +135,20 @@
                             CommandParameter="{Binding .}" />
                     </Border.GestureRecognizers>
 
-                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
-                        <!-- Station logo; the initial on the accent color if it has none -->
-                        <controls:StationLogoView WidthRequest="48" HeightRequest="48" Source="{Binding FaviconUrl}" Initial="{Binding Initial}" />
+                    <Grid RowDefinitions="Auto,*" RowSpacing="8">
+                        <Grid ColumnDefinitions="Auto,*">
+                            <controls:StationLogoView WidthRequest="44" HeightRequest="44" InitialFontSize="20"
+                                                      Source="{Binding FaviconUrl}" Initial="{Binding Initial}"
+                                                      FallbackColor="{Binding CardAccent}" />
+                            <Label Grid.Column="1" Text="Sonando" IsVisible="{Binding IsPlaying}"
+                                   FontSize="12" FontAttributes="Bold" TextColor="{Binding CardAccent}"
+                                   HorizontalOptions="End" VerticalOptions="Start" />
+                        </Grid>
 
-                        <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
-                            <Label Text="{Binding Name}" Style="{StaticResource Body1Strong}" LineBreakMode="TailTruncation" />
-                            <Label Text="{Binding Subtitle}" Style="{StaticResource Muted}" LineBreakMode="TailTruncation" />
+                        <VerticalStackLayout Grid.Row="1" VerticalOptions="End" Spacing="2">
+                            <Label Text="{Binding Name}" Style="{StaticResource Body1Strong}" MaxLines="1" LineBreakMode="TailTruncation" />
+                            <Label Text="{Binding Subtitle}" Style="{StaticResource Muted}" FontSize="12" MaxLines="2" LineBreakMode="TailTruncation" />
                         </VerticalStackLayout>
-
-                        <Label Grid.Column="2" Text="Sonando" IsVisible="{Binding IsPlaying}"
-                               FontSize="13" FontAttributes="Bold" TextColor="{DynamicResource PrimaryText}"
-                               VerticalOptions="Center" />
                     </Grid>
                 </Border>
             </DataTemplate>
@@ -147,7 +160,14 @@
                          Color="{DynamicResource Primary}" />
     </Grid>
 
-    <!-- Mini player (its BindingContext is set by the page code) -->
-    <controls:MiniPlayerView x:Name="MiniPlayer" Grid.Row="1" />
+    <!-- Mini player: only on a phone (on a computer the panel at the right does its job) -->
+    <Grid Grid.Row="1" IsVisible="{OnIdiom Phone=True, Default=False}">
+        <controls:MiniPlayerView x:Name="MiniPlayer" />
+    </Grid>
+  </Grid>
+
+    <!-- Now-playing panel (its BindingContext is set by the page code) -->
+    <controls:NowPlayingPanelView x:Name="NowPlaying" Grid.Column="1" Margin="0,16,16,16"
+                                  IsVisible="{OnIdiom Phone=False, Default=True}" />
   </Grid>
 </ContentPage>
