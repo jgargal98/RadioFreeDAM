@@ -17,7 +17,6 @@ public partial class HomeViewModel : ObservableObject
     private readonly IStationApiService _stationApiService;
     private readonly IPlayerService _playerService;
     private readonly INavigationService _navigationService;
-    private readonly ISessionService _session;
     private readonly IDialogService _dialogService;
     private bool _isInitialized;
 
@@ -27,9 +26,6 @@ public partial class HomeViewModel : ObservableObject
     private string _scope = CatalogFilters.ScopeSpain;
     private string _category = CatalogFilters.AllCategories;
     private string _sort = CatalogFilters.SortClicks;
-
-    /// <summary>True while ResetFilters changes the sort itself, so the change does not start its own load.</summary>
-    private bool _resetting;
 
     private CancellationTokenSource? _searchDelayCts;
 
@@ -41,98 +37,55 @@ public partial class HomeViewModel : ObservableObject
         IStationApiService stationApiService,
         IPlayerService playerService,
         INavigationService navigationService,
-        ISessionService session,
         IDialogService dialogService)
     {
         _apiStatusService = apiStatusService;
         _stationApiService = stationApiService;
         _playerService = playerService;
         _navigationService = navigationService;
-        _session = session;
         _dialogService = dialogService;
 
-        Scopes = [.. CatalogFilters.Scopes.Select(o => new FilterOptionViewModel(o))];
-        Categories = [.. CatalogFilters.Categories.Select(o => new FilterOptionViewModel(o))];
-        SortOptions = [.. CatalogFilters.Sorts];
-        SelectedSort = SortOptions[0];
-        UpdateSelections();
-
+        UpdateFilterTexts();
         _playerService.StateChanged += (_, _) => RefreshPlaybackMarks();
-        _session.SessionChanged += (_, _) => OnPropertyChanged(nameof(Greeting));
     }
 
     public ObservableCollection<StationItemViewModel> Stations { get; } = [];
 
-    // ---------- Greeting ----------
+    // ---------- Filters: three drop-down menus (scope, category, sort) ----------
 
-    /// <summary>"Buenas tardes, Juan" (or just the salutation without a session).</summary>
-    public string Greeting
-    {
-        get
-        {
-            var hour = DateTime.Now.Hour;
-            var salutation = hour switch { < 6 => "Buenas noches", < 14 => "Buenos días", < 21 => "Buenas tardes", _ => "Buenas noches" };
-            return _session.CurrentUser is { } user ? $"{salutation}, {user.Name.Split(' ')[0]}" : salutation;
-        }
-    }
-
-    // ---------- Filters ----------
-
-    public IReadOnlyList<FilterOptionViewModel> Scopes { get; }
-
-    public IReadOnlyList<FilterOptionViewModel> Categories { get; }
-
-    // A concrete list: Picker.ItemsSource needs an IList, which IReadOnlyList does not guarantee.
-    public List<FilterOption> SortOptions { get; }
-
-    /// <summary>Bound to the sort picker. Changing it reloads the list.</summary>
-    // Nullable on purpose: a Picker sets SelectedItem to null while it is being built or rebuilt.
-    // The sort actually used is always _sort, which never becomes null.
+    /// <summary>Text of each drop-down button: the option that is currently chosen.</summary>
     [ObservableProperty]
-    public partial FilterOption? SelectedSort { get; set; }
+    public partial string ScopeText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string CategoryText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string SortText { get; set; } = string.Empty;
 
     [ObservableProperty]
     public partial bool HasActiveFilters { get; set; }
 
     [RelayCommand]
-    private async Task SelectScopeAsync(FilterOptionViewModel option)
-    {
-        if (option.Id == _scope)
-            return;
-
-        _scope = option.Id;
-        await ApplyFiltersAsync();
-    }
+    private Task ChooseScopeAsync() => ChooseAsync("Ámbito", CatalogFilters.Scopes, _scope, id => _scope = id);
 
     [RelayCommand]
-    private async Task SelectCategoryAsync(FilterOptionViewModel option)
-    {
-        if (option.Id == _category)
-            return;
+    private Task ChooseCategoryAsync() => ChooseAsync("Categoría", CatalogFilters.Categories, _category, id => _category = id);
 
-        _category = option.Id;
-        await ApplyFiltersAsync();
-    }
-
-    partial void OnSelectedSortChanged(FilterOption? value)
-    {
-        // The picker sends null while it is built and a real option when the user chooses one.
-        if (value is null || value.Id == _sort)
-            return;
-
-        _sort = value.Id;
-        if (!_resetting)
-            _ = ApplyFiltersAsync();
-    }
-
-    /// <summary>Opens the list of sort options.</summary>
     [RelayCommand]
-    private async Task ChooseSortAsync()
+    private Task ChooseSortAsync() => ChooseAsync("Ordenar por", CatalogFilters.Sorts, _sort, id => _sort = id);
+
+    /// <summary>Shows the options of a filter; if the user picks a different one, stores it and reloads the list.</summary>
+    private async Task ChooseAsync(string title, IReadOnlyList<FilterOption> options, string current, Action<string> apply)
     {
-        var chosen = await _dialogService.ChooseAsync("Ordenar por", [.. SortOptions.Select(o => o.Name)]);
-        var option = SortOptions.FirstOrDefault(o => o.Name == chosen);
-        if (option is not null)
-            SelectedSort = option;
+        var chosen = await _dialogService.ChooseAsync(title, [.. options.Select(o => o.Name)]);
+        var option = options.FirstOrDefault(o => o.Name == chosen);
+        if (option is null || option.Id == current)
+            return;
+
+        apply(option.Id);
+        UpdateFilterTexts();
+        await LoadAsync();
     }
 
     [RelayCommand]
@@ -140,39 +93,25 @@ public partial class HomeViewModel : ObservableObject
     {
         _scope = CatalogFilters.ScopeSpain;
         _category = CatalogFilters.AllCategories;
-        _resetting = true;
         _sort = CatalogFilters.SortClicks;
-        SelectedSort = SortOptions[0];
-        _resetting = false;
-        await ApplyFiltersAsync();
+        UpdateFilterTexts();
+        await LoadAsync();
     }
 
-    private Task ApplyFiltersAsync()
+    private void UpdateFilterTexts()
     {
-        UpdateSelections();
-        return LoadAsync();
-    }
-
-    private void UpdateSelections()
-    {
-        foreach (var option in Scopes)
-            option.IsSelected = option.Id == _scope;
-        foreach (var option in Categories)
-            option.IsSelected = option.Id == _category;
-
+        ScopeText = CatalogFilters.Scopes.First(o => o.Id == _scope).Name;
+        CategoryText = CatalogFilters.Categories.First(o => o.Id == _category).Name;
+        SortText = CatalogFilters.Sorts.First(o => o.Id == _sort).Name;
         HasActiveFilters = CurrentFilter.HasActiveFilters;
     }
 
     private CatalogFilter CurrentFilter => new(_query, _scope, _category, _sort);
-
     // ---------- State ----------
 
+    /// <summary>The single line above the list, for example "Top España · Música · 20 resultados".</summary>
     [ObservableProperty]
-    public partial string ListTitle { get; set; } = "Top España";
-
-    /// <summary>Second line of the list header: how it is sorted and how many rows there are.</summary>
-    [ObservableProperty]
-    public partial string ListSubtitle { get; set; } = string.Empty;
+    public partial string ListSummary { get; set; } = string.Empty;
 
     [ObservableProperty]
     public partial string SearchText { get; set; } = string.Empty;
@@ -299,8 +238,7 @@ public partial class HomeViewModel : ObservableObject
             foreach (var entry in entries)
                 Stations.Add(new StationItemViewModel(entry));
 
-            ListTitle = BuildTitle(filter);
-            ListSubtitle = BuildSubtitle(filter, entries.Count);
+            ListSummary = BuildSummary(filter, entries.Count);
             EmptyMessage = filter.Name is not null
                 ? $"No hay emisoras que coincidan con «{filter.Name}». Prueba con otro nombre o cambia los filtros."
                 : "No hay emisoras con estos filtros. Prueba con otra categoría o con Mundo.";
@@ -320,21 +258,15 @@ public partial class HomeViewModel : ObservableObject
         }
     }
 
-    private static string BuildTitle(CatalogFilter filter)
+    private static string BuildSummary(CatalogFilter filter, int rows)
     {
         var scope = filter.Scope == CatalogFilters.ScopeSpain ? "España" : "Mundo";
-        var title = filter.Name is null ? $"Top {scope}" : $"Resultados de «{filter.Name}»";
+        var title = filter.Name is null ? $"Top {scope}" : $"«{filter.Name}»";
 
         if (filter.Category != CatalogFilters.AllCategories)
             title += $" · {CatalogFilters.Categories.First(c => c.Id == filter.Category).Name}";
 
-        return title;
-    }
-
-    private static string BuildSubtitle(CatalogFilter filter, int rows)
-    {
-        var sort = CatalogFilters.Sorts.First(s => s.Id == filter.Sort).Name;
-        return rows == 0 ? sort : $"{rows} resultados · {sort}";
+        return rows == 0 ? title : $"{title} · {rows} resultados";
     }
 
     // ---------- Navigation ----------

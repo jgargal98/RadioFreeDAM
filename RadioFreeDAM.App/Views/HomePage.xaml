@@ -21,17 +21,16 @@
         <CollectionView.Header>
             <VerticalStackLayout Spacing="12" Padding="0,0,0,12">
 
-                <!-- Greeting, server status and settings -->
-                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
-                    <VerticalStackLayout Spacing="2">
-                        <Label Text="{Binding Greeting}" Style="{StaticResource Muted}" />
-                        <Label Text="¿Qué escuchamos?" Style="{StaticResource Title1}" />
-                    </VerticalStackLayout>
-
+                <!-- Search and settings: the only things always visible above the list -->
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="4">
+                    <SearchBar Placeholder="Buscar emisora"
+                               Text="{Binding SearchText}"
+                               SearchCommand="{Binding SearchCommand}"
+                               SemanticProperties.Hint="Escribe el nombre de una emisora; los resultados aparecen solos" />
                     <ImageButton Grid.Column="1"
                                  Command="{Binding OpenSettingsCommand}"
                                  WidthRequest="44" HeightRequest="44" Padding="10"
-                                 Background="Transparent" VerticalOptions="Start"
+                                 Background="Transparent" VerticalOptions="Center"
                                  SemanticProperties.Description="Ajustes">
                         <ImageButton.Source>
                             <FontImageSource Glyph="{x:Static f:FluentUI.settings_24_regular}"
@@ -42,128 +41,63 @@
                     </ImageButton>
                 </Grid>
 
-                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
-                    <Border Style="{StaticResource ChipStyle}">
-                        <HorizontalStackLayout Spacing="6">
-                            <Ellipse WidthRequest="8" HeightRequest="8" VerticalOptions="Center"
-                                     Fill="{StaticResource Gray400}">
-                                <Ellipse.Triggers>
-                                    <DataTrigger TargetType="Ellipse" Binding="{Binding IsServerOk}" Value="True">
-                                        <Setter Property="Fill" Value="{StaticResource Online}" />
-                                    </DataTrigger>
-                                    <DataTrigger TargetType="Ellipse" Binding="{Binding IsServerDown}" Value="True">
-                                        <Setter Property="Fill" Value="{StaticResource Error}" />
-                                    </DataTrigger>
-                                </Ellipse.Triggers>
-                            </Ellipse>
-                            <Label Text="{Binding ServerStatusText}" Style="{StaticResource Muted}" FontSize="13" />
-                        </HorizontalStackLayout>
-                    </Border>
-
-                    <Button Grid.Column="1" Text="Recargar" Style="{StaticResource OutlineButton}"
-                            Command="{Binding RefreshCommand}"
-                            SemanticProperties.Hint="Vuelve a comprobar el servidor y cargar las emisoras" />
-                </Grid>
-
-                <!-- Search by name while typing: the API resolves it by asking Radio Browser -->
-                <SearchBar Placeholder="Buscar emisora por nombre"
-                           Text="{Binding SearchText}"
-                           SearchCommand="{Binding SearchCommand}"
-                           SemanticProperties.Hint="Escribe el nombre de una emisora; los resultados aparecen solos" />
-
-                <!-- Scope: Spain or the world -->
-                <Border Style="{StaticResource SegmentedStyle}">
-                    <FlexLayout BindableLayout.ItemsSource="{Binding Scopes}" JustifyContent="SpaceEvenly">
-                        <BindableLayout.ItemTemplate>
-                            <DataTemplate x:DataType="vm:FilterOptionViewModel">
-                                <Border Style="{StaticResource SegmentStyle}" FlexLayout.Grow="1"
-                                        SemanticProperties.Description="{Binding Name}">
-                                    <Border.Triggers>
-                                        <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
-                                            <Setter Property="Background" Value="{DynamicResource PrimaryBrush}" />
-                                        </DataTrigger>
-                                    </Border.Triggers>
-                                    <Border.GestureRecognizers>
-                                        <TapGestureRecognizer
-                                            Command="{Binding SelectScopeCommand, Source={RelativeSource AncestorType={x:Type vm:HomeViewModel}}, x:DataType=vm:HomeViewModel}"
-                                            CommandParameter="{Binding .}" />
-                                    </Border.GestureRecognizers>
-                                    <Label Text="{Binding Name}" HorizontalTextAlignment="Center" FontSize="15">
-                                        <Label.Triggers>
-                                            <DataTrigger TargetType="Label" Binding="{Binding IsSelected}" Value="True">
-                                                <Setter Property="TextColor" Value="{DynamicResource OnPrimary}" />
-                                                <Setter Property="FontAttributes" Value="Bold" />
-                                            </DataTrigger>
-                                        </Label.Triggers>
-                                    </Label>
-                                </Border>
-                            </DataTemplate>
-                        </BindableLayout.ItemTemplate>
-                    </FlexLayout>
-                </Border>
-
-                <!-- Categories: one row that scrolls sideways -->
+                <!-- Filters: three drop-down menus. Each shows the chosen option and opens its list when tapped -->
                 <ScrollView Orientation="Horizontal" HorizontalScrollBarVisibility="Never">
-                    <HorizontalStackLayout BindableLayout.ItemsSource="{Binding Categories}" Spacing="8">
-                        <BindableLayout.ItemTemplate>
-                            <DataTemplate x:DataType="vm:FilterOptionViewModel">
-                                <Border Style="{StaticResource FilterChipStyle}"
-                                        SemanticProperties.Description="{Binding Name}">
-                                    <Border.Triggers>
-                                        <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
-                                            <Setter Property="Background" Value="{AppThemeBinding Light={StaticResource ChipSelectedLight}, Dark={StaticResource ChipSelectedDark}}" />
-                                        </DataTrigger>
-                                    </Border.Triggers>
-                                    <Border.GestureRecognizers>
-                                        <TapGestureRecognizer
-                                            Command="{Binding SelectCategoryCommand, Source={RelativeSource AncestorType={x:Type vm:HomeViewModel}}, x:DataType=vm:HomeViewModel}"
-                                            CommandParameter="{Binding .}" />
-                                    </Border.GestureRecognizers>
-                                    <Label Text="{Binding Name}" FontSize="15" VerticalOptions="Center">
-                                        <Label.Triggers>
-                                            <DataTrigger TargetType="Label" Binding="{Binding IsSelected}" Value="True">
-                                                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource ChipSelectedTextLight}, Dark={StaticResource ChipSelectedTextDark}}" />
-                                                <Setter Property="FontAttributes" Value="Bold" />
-                                            </DataTrigger>
-                                        </Label.Triggers>
-                                    </Label>
-                                </Border>
-                            </DataTemplate>
-                        </BindableLayout.ItemTemplate>
+                    <HorizontalStackLayout Spacing="8">
+                        <Border Style="{StaticResource FilterChipStyle}" SemanticProperties.Description="Ámbito">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding ChooseScopeCommand}" />
+                            </Border.GestureRecognizers>
+                            <HorizontalStackLayout Spacing="6" VerticalOptions="Center">
+                                <Label Text="{Binding ScopeText}" FontSize="15" VerticalOptions="Center" />
+                                <Label Text="{x:Static f:FluentUI.chevron_down_20_regular}" FontFamily="{x:Static f:FluentUI.FontFamily}"
+                                       FontSize="18" VerticalOptions="Center"
+                                       TextColor="{AppThemeBinding Light={StaticResource MutedTextLight}, Dark={StaticResource MutedTextDark}}" />
+                            </HorizontalStackLayout>
+                        </Border>
+
+                        <Border Style="{StaticResource FilterChipStyle}" SemanticProperties.Description="Categoría">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding ChooseCategoryCommand}" />
+                            </Border.GestureRecognizers>
+                            <HorizontalStackLayout Spacing="6" VerticalOptions="Center">
+                                <Label Text="{Binding CategoryText}" FontSize="15" VerticalOptions="Center" />
+                                <Label Text="{x:Static f:FluentUI.chevron_down_20_regular}" FontFamily="{x:Static f:FluentUI.FontFamily}"
+                                       FontSize="18" VerticalOptions="Center"
+                                       TextColor="{AppThemeBinding Light={StaticResource MutedTextLight}, Dark={StaticResource MutedTextDark}}" />
+                            </HorizontalStackLayout>
+                        </Border>
+
+                        <Border Style="{StaticResource FilterChipStyle}" SemanticProperties.Description="Orden">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding ChooseSortCommand}" />
+                            </Border.GestureRecognizers>
+                            <HorizontalStackLayout Spacing="6" VerticalOptions="Center">
+                                <Label Text="{Binding SortText}" FontSize="15" VerticalOptions="Center" />
+                                <Label Text="{x:Static f:FluentUI.chevron_down_20_regular}" FontFamily="{x:Static f:FluentUI.FontFamily}"
+                                       FontSize="18" VerticalOptions="Center"
+                                       TextColor="{AppThemeBinding Light={StaticResource MutedTextLight}, Dark={StaticResource MutedTextDark}}" />
+                            </HorizontalStackLayout>
+                        </Border>
                     </HorizontalStackLayout>
                 </ScrollView>
 
-                <!-- Error (server down, Radio Browser not available...) -->
+                <!-- Error: only appears when something fails, with a retry button -->
                 <Border Style="{StaticResource CardStyle}" IsVisible="{Binding HasError}">
-                    <Label Text="{Binding ErrorMessage}" Style="{StaticResource ErrorText}" />
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="{Binding ErrorMessage}" Style="{StaticResource ErrorText}" />
+                        <Button Text="Reintentar" Style="{StaticResource OutlineButton}" HorizontalOptions="Start"
+                                Command="{Binding RefreshCommand}" />
+                    </VerticalStackLayout>
                 </Border>
 
-                <!-- List title, result count and reset -->
-                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8" Margin="0,8,0,0">
-                    <VerticalStackLayout Spacing="2">
-                        <Label Text="{Binding ListTitle}" Style="{StaticResource Title2}" LineBreakMode="TailTruncation" />
-                        <Label Text="{Binding ListSubtitle}" Style="{StaticResource Muted}" FontSize="13" />
-                    </VerticalStackLayout>
-                    <Button Grid.Column="1" Text="Restablecer" Style="{StaticResource OutlineButton}"
-                            VerticalOptions="Center" IsVisible="{Binding HasActiveFilters}"
-                            Command="{Binding ResetFiltersCommand}" />
+                <!-- One quiet line: what is shown and how many; reset only when filters are active -->
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                    <Label Text="{Binding ListSummary}" Style="{StaticResource Muted}" VerticalOptions="Center" LineBreakMode="TailTruncation" />
+                    <Button Grid.Column="1" Text="Restablecer" Style="{StaticResource TextButton}"
+                            IsVisible="{Binding HasActiveFilters}" Command="{Binding ResetFiltersCommand}" />
                 </Grid>
-
-                <!-- Sort order: a row that opens the list of options (a Picker shows its title instead of the value on Android) -->
-                <Border Style="{StaticResource SegmentedStyle}" Padding="16,0" HeightRequest="48"
-                        SemanticProperties.Description="Cambiar el orden de la lista">
-                    <Border.GestureRecognizers>
-                        <TapGestureRecognizer Command="{Binding ChooseSortCommand}" />
-                    </Border.GestureRecognizers>
-                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
-                        <Label Text="Ordenar por" Style="{StaticResource Muted}" VerticalOptions="Center" />
-                        <Label Grid.Column="1" Text="{Binding SelectedSort.Name}" FontAttributes="Bold" FontSize="15"
-                               HorizontalTextAlignment="End" VerticalOptions="Center" LineBreakMode="TailTruncation" />
-                        <Label Grid.Column="2" Text="{x:Static f:FluentUI.chevron_down_20_regular}"
-                               FontFamily="{x:Static f:FluentUI.FontFamily}" FontSize="20" VerticalOptions="Center"
-                               TextColor="{AppThemeBinding Light={StaticResource MutedTextLight}, Dark={StaticResource MutedTextDark}}" />
-                    </Grid>
-                </Border>            </VerticalStackLayout>
+            </VerticalStackLayout>
         </CollectionView.Header>
 
         <!-- Empty list: search or filters without results -->
