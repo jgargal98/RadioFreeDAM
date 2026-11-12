@@ -28,17 +28,19 @@
 
             <CollectionView Grid.Row="3" ItemsSource="{Binding Stations}" SelectionMode="None">
                 <CollectionView.ItemsLayout>
-                    <LinearItemsLayout Orientation="Vertical" ItemSpacing="8" />
+                    <GridItemsLayout Orientation="Vertical" Span="{OnIdiom Phone=2, Tablet=3, Desktop=4}"
+                                     HorizontalItemSpacing="12" VerticalItemSpacing="12" />
                 </CollectionView.ItemsLayout>
 
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="vm:StationItemViewModel">
-                        <Border Style="{StaticResource CardStyle}" SemanticProperties.Description="{Binding Name}">
+                        <!-- Same tinted card as Home: color comes from the logo of the station -->
+                        <Border Style="{StaticResource CardStyle}" Background="{Binding CardBackground}"
+                                HeightRequest="148" SemanticProperties.Description="{Binding Name}">
                             <Border.Triggers>
                                 <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
                                     <Setter Property="StrokeThickness" Value="2" />
-                                    <Setter Property="Stroke" Value="{DynamicResource Primary}" />
-                                    <Setter Property="Background" Value="{DynamicResource PrimarySoft}" />
+                                    <Setter Property="Stroke" Value="{Binding CardAccent}" />
                                 </DataTrigger>
                             </Border.Triggers>
                             <Border.GestureRecognizers>
@@ -47,17 +49,19 @@
                                     CommandParameter="{Binding .}" />
                             </Border.GestureRecognizers>
 
-                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
-                                <controls:StationLogoView WidthRequest="48" HeightRequest="48" Source="{Binding FaviconUrl}" Initial="{Binding Initial}" />
-
-                                <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
-                                    <Label Text="{Binding Name}" Style="{StaticResource Body1Strong}" LineBreakMode="TailTruncation" />
-                                    <Label Text="{Binding Subtitle}" Style="{StaticResource Muted}" LineBreakMode="TailTruncation" />
+                            <Grid RowDefinitions="Auto,*" RowSpacing="8">
+                                <Grid ColumnDefinitions="Auto,*">
+                                    <controls:StationLogoView WidthRequest="44" HeightRequest="44" HorizontalOptions="Start"
+                                                              FallbackColor="{Binding CardAccent}"
+                                                              Source="{Binding FaviconUrl}" Initial="{Binding Initial}" />
+                                    <Label Grid.Column="1" Text="Sonando" IsVisible="{Binding IsPlaying}"
+                                           FontSize="13" FontAttributes="Bold" TextColor="{DynamicResource PrimaryText}"
+                                           HorizontalOptions="End" VerticalOptions="Start" />
+                                </Grid>
+                                <VerticalStackLayout Grid.Row="1" VerticalOptions="End" Spacing="2">
+                                    <Label Text="{Binding Name}" Style="{StaticResource Body1Strong}" MaxLines="1" LineBreakMode="TailTruncation" />
+                                    <Label Text="{Binding Subtitle}" Style="{StaticResource Muted}" MaxLines="2" LineBreakMode="TailTruncation" />
                                 </VerticalStackLayout>
-
-                                <Label Grid.Column="2" Text="Sonando" IsVisible="{Binding IsPlaying}"
-                                       FontSize="13" FontAttributes="Bold" TextColor="{DynamicResource PrimaryText}"
-                                       VerticalOptions="Center" />
                             </Grid>
                         </Border>
                     </DataTemplate>

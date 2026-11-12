@@ -120,7 +120,7 @@
             <DataTemplate x:DataType="vm:StationItemViewModel">
                 <!-- Card tinted with the color of the station -->
                 <Border Style="{StaticResource CardStyle}" Background="{Binding CardBackground}"
-                        HeightRequest="136" Padding="14"
+                        HeightRequest="148" Padding="14"
                         SemanticProperties.Description="{Binding Name}">
                     <Border.Triggers>
                         <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">

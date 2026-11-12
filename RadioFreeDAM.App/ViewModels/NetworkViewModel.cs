@@ -13,15 +13,20 @@ public partial class NetworkViewModel : ObservableObject, IQueryAttributable
     private readonly IStationApiService _stationApi;
     private readonly IPlayerService _player;
     private readonly INavigationService _navigation;
+    private readonly IStationColorService _stationColors;
     private NetworkDto? _network;
+    private int _requestVersion; // drops logo colors that arrive after the list was reloaded
 
-    public NetworkViewModel(IStationApiService stationApi, IPlayerService player, INavigationService navigation)
+    public NetworkViewModel(IStationApiService stationApi, IPlayerService player, INavigationService navigation,
+        IStationColorService stationColors, IAccentService accent)
     {
         _stationApi = stationApi;
         _player = player;
         _navigation = navigation;
+        _stationColors = stationColors;
 
         _player.StateChanged += (_, _) => RefreshPlaybackMarks();
+        accent.AccentChanged += (_, _) => { foreach (var item in Stations) item.RefreshColors(); };
     }
 
     public ObservableCollection<StationItemViewModel> Stations { get; } = [];
@@ -57,6 +62,7 @@ public partial class NetworkViewModel : ObservableObject, IQueryAttributable
 
         IsLoading = true;
         ErrorMessage = null;
+        var request = ++_requestVersion;
         try
         {
             var stations = await _stationApi.GetNetworkStationsAsync(_network.Id);
@@ -66,6 +72,7 @@ public partial class NetworkViewModel : ObservableObject, IQueryAttributable
                 Stations.Add(new StationItemViewModel(station));
 
             RefreshPlaybackMarks();
+            _ = LoadCardColorsAsync(request);
         }
         catch (Exception ex) when (ApiException.IsCommunicationError(ex))
         {
@@ -82,6 +89,27 @@ public partial class NetworkViewModel : ObservableObject, IQueryAttributable
     {
         _player.Select(item.Station!);
         await _navigation.GoToPlayerAsync();
+    }
+
+    /// <summary>Takes the color of each logo in the background, a few at a time, to tint the cards.</summary>
+    private async Task LoadCardColorsAsync(int request)
+    {
+        using var limit = new SemaphoreSlim(4);
+
+        await Task.WhenAll(Stations.ToList().Select(async item =>
+        {
+            await limit.WaitAsync();
+            try
+            {
+                var color = await _stationColors.GetAccentColorAsync(item.Station!);
+                if (color is not null && request == _requestVersion)
+                    item.SetLogoColor(color);
+            }
+            finally
+            {
+                limit.Release();
+            }
+        }));
     }
 
     private void RefreshPlaybackMarks()
