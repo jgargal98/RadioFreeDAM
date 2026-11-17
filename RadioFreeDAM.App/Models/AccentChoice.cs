@@ -3,7 +3,7 @@ namespace RadioFreeDAM.Models;
 /// <summary>De dónde sale el color de acento de la app.</summary>
 public enum AccentSource
 {
-    /// <summary>Color del logo de la emisora seleccionada (verde si no hay o no tiene logo).</summary>
+    /// <summary>Color del logo de la emisora seleccionada (coral si no hay o no tiene logo).</summary>
     Station,
 
     /// <summary>Uno de los colores fijos.</summary>

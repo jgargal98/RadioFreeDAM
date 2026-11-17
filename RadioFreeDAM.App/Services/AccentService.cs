@@ -60,7 +60,7 @@ public class AccentService(IPlayerService player, IStationColorService stationCo
         _stationCts?.Cancel();
         var cts = _stationCts = new CancellationTokenSource();
 
-        // Hasta tener el color nuevo se mantiene el anterior, para no parpadear a verde.
+        // Hasta tener el color nuevo se mantiene el anterior, para no parpadear a coral.
         var color = station is null ? null : await stationColors.GetAccentColorAsync(station, cts.Token);
         if (cts.IsCancellationRequested)
             return;

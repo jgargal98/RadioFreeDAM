@@ -41,7 +41,7 @@
             <Grid HeightRequest="240">
                 <controls:SoundWavesView WaveColor="{Binding WaveColor}" IsAnimating="{Binding IsPlaying}" />
 
-            <!-- Logo de la emisora; si no tiene, la inicial sobre fondo verde -->
+            <!-- Logo de la emisora; si no tiene, la inicial sobre fondo de color -->
             <controls:StationLogoView WidthRequest="180" HeightRequest="180" HorizontalOptions="Center" VerticalOptions="Center" Source="{Binding CurrentStation.FaviconUrl}" Initial="{Binding StationInitial}" CornerRadius="28" InitialFontSize="84" LogoPadding="16" />
             </Grid>
 
@@ -89,7 +89,7 @@
                 </ImageButton.Triggers>
             </ImageButton>
 
-            <!-- Favorita: sin sesión lleva a Iniciar sesión; verde cuando ya está guardada -->
+            <!-- Favorita: sin sesión lleva a Iniciar sesión; con el acento cuando ya está guardada -->
             <VerticalStackLayout Spacing="6" HorizontalOptions="Center">
                 <Button Text="{Binding FavoriteButtonText}"
                         Command="{Binding ToggleFavoriteCommand}"

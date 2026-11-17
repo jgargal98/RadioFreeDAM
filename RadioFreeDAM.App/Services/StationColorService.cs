@@ -79,7 +79,7 @@ public class StationColorService : IStationColorService
             colorful++;
         }
 
-        // Si casi no hay color (logo en blanco y negro), mejor usar el verde de la app.
+        // Si casi no hay color (logo en blanco y negro), mejor usar el coral de la app.
         if (colorful < SampleSize * SampleSize / 20)
             return null;
 

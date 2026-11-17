@@ -104,7 +104,7 @@
                         <Grid ColumnDefinitions="*,Auto">
                             <VerticalStackLayout Spacing="2">
                                 <Label Text="Color de la emisora" Style="{StaticResource Body1Strong}" />
-                                <Label Text="Cambia según lo que suena. Sin emisora o sin logo, verde."
+                                <Label Text="Cambia según lo que suena. Sin emisora o sin logo, coral."
                                        Style="{StaticResource Muted}" />
                             </VerticalStackLayout>
                             <Label Grid.Column="1" Text="{x:Static f:FluentUI.checkmark_24_regular}"
