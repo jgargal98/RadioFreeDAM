@@ -1,16 +1,23 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!-- Primer plano del icono: radio clásica. Ocupa el centro para no cortarse en los iconos adaptativos de Android. -->
+<!-- Icon foreground: car stereo. Kept in the center so adaptive icons do not cut it. -->
 <svg width="456" height="456" viewBox="0 0 456 456" version="1.1" xmlns="http://www.w3.org/2000/svg">
-    <!-- Antena -->
-    <line x1="168" y1="194" x2="292" y2="124" stroke="#0B0B0B" stroke-width="14" stroke-linecap="round" />
-    <circle cx="292" cy="124" r="11" fill="#0B0B0B" />
-    <!-- Cuerpo -->
-    <rect x="114" y="190" width="228" height="150" rx="28" fill="#0B0B0B" />
-    <!-- Dial -->
-    <rect x="144" y="232" width="64" height="11" rx="5.5" fill="#E2765A" />
-    <rect x="144" y="260" width="64" height="11" rx="5.5" fill="#E2765A" />
-    <rect x="144" y="288" width="64" height="11" rx="5.5" fill="#E2765A" />
-    <!-- Altavoz -->
-    <circle cx="278" cy="265" r="44" fill="#E2765A" />
-    <circle cx="278" cy="265" r="16" fill="#0B0B0B" />
+    <!-- Car stereo, scaled to stay inside the safe zone of the adaptive icons of Android -->
+    <g transform="translate(228 228) scale(0.74) translate(-228 -228)">
+        <!-- Body -->
+        <rect x="64" y="148" width="328" height="160" rx="24" fill="#1B1210" />
+        <!-- Knobs -->
+        <circle cx="112" cy="228" r="30" fill="#E2765A" />
+        <circle cx="112" cy="228" r="11" fill="#1B1210" />
+        <circle cx="344" cy="228" r="30" fill="#E2765A" />
+        <circle cx="344" cy="228" r="11" fill="#1B1210" />
+        <!-- Display -->
+        <rect x="160" y="182" width="136" height="60" rx="10" fill="#FFF3EE" />
+        <rect x="174" y="198" width="52" height="10" rx="5" fill="#1B1210" />
+        <rect x="174" y="217" width="84" height="8" rx="4" fill="#1B1210" opacity="0.45" />
+        <!-- Preset buttons -->
+        <rect x="160" y="262" width="26" height="14" rx="5" fill="#E2765A" />
+        <rect x="194" y="262" width="26" height="14" rx="5" fill="#E2765A" />
+        <rect x="228" y="262" width="26" height="14" rx="5" fill="#E2765A" />
+        <rect x="262" y="262" width="34" height="14" rx="5" fill="#E2765A" />
+    </g>
 </svg>
