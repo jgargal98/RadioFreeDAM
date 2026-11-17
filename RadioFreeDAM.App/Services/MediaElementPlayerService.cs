@@ -63,6 +63,13 @@ public class MediaElementPlayerService : IPlayerService
         SetState(PlaybackState.Loading);
         StartLoadingTimeout();
 
+        // Title and logo shown in the playback notification (Android) and the media controls.
+        _mediaElement.MetadataTitle = CurrentStation.Name;
+        _mediaElement.MetadataArtist = "RadioFreeDAM";
+        _mediaElement.MetadataArtworkUrl = Uri.TryCreate(CurrentStation.FaviconUrl, UriKind.Absolute, out var logo)
+            ? logo.ToString()
+            : string.Empty;
+
         // Con ShouldAutoPlay="True" en la vista, asignar la fuente ya empieza la reproducción.
         // Se asigna cada vez para conectar con el directo y no con un búfer antiguo.
         _mediaElement.Source = MediaSource.FromUri(CurrentStation.StreamUrl);
@@ -89,6 +96,14 @@ public class MediaElementPlayerService : IPlayerService
     {
         MainThread.BeginInvokeOnMainThread(() =>
         {
+            // The notification Play button resumes a source that the system had paused: Stop() clears the
+            // source, so a source that is still set means the user did not stop it.
+            if (State == PlaybackState.Stopped && e.NewState == MediaElementState.Playing && _mediaElement?.Source is not null)
+            {
+                SetState(PlaybackState.Playing);
+                return;
+            }
+
             // Si el usuario ya ha detenido o hay un error, ignoramos los avisos que lleguen tarde.
             if (State is PlaybackState.Stopped or PlaybackState.Error)
                 return;

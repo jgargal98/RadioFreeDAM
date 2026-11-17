@@ -13,8 +13,9 @@ namespace RadioFreeDAM
             builder
                 .UseMauiApp<App>()
                 .UseMauiCommunityToolkit()
-                // Reproducción de audio. Sin servicio en primer plano de Android: no hay notificación de reproducción.
-                .UseMauiCommunityToolkitMediaElement(isAndroidForegroundServiceEnabled: false)
+                // Audio playback. The Android foreground service keeps the radio playing with the app in the
+                // background and shows the playback notification (needs the permissions of the manifest).
+                .UseMauiCommunityToolkitMediaElement(isAndroidForegroundServiceEnabled: true)
                 .ConfigureMauiHandlers(handlers =>
                 {
 #if WINDOWS
