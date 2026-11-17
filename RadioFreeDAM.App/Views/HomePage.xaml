@@ -140,9 +140,9 @@
                             <controls:StationLogoView WidthRequest="44" HeightRequest="44" InitialFontSize="20"
                                                       Source="{Binding FaviconUrl}" Initial="{Binding Initial}"
                                                       FallbackColor="{Binding CardAccent}" />
-                            <Label Grid.Column="1" Text="Sonando" IsVisible="{Binding IsPlaying}"
-                                   FontSize="12" FontAttributes="Bold" TextColor="{Binding CardAccent}"
-                                   HorizontalOptions="End" VerticalOptions="Start" />
+                            <controls:EqualizerView Grid.Column="1" IsVisible="{Binding IsPlaying}" BarColor="{Binding CardAccent}"
+                                                    HorizontalOptions="End" VerticalOptions="Start" Margin="0,4,2,0"
+                                                    SemanticProperties.Description="Sonando" />
                         </Grid>
 
                         <VerticalStackLayout Grid.Row="1" VerticalOptions="End" Spacing="2">

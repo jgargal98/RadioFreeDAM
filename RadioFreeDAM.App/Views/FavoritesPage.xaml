@@ -86,12 +86,10 @@
                                         <Label Text="{Binding Subtitle}" Style="{StaticResource Muted}" LineBreakMode="TailTruncation" />
                                     </VerticalStackLayout>
 
-                                    <Label Grid.Column="2"
-                                           Text="Sonando"
-                                           IsVisible="{Binding IsPlaying}"
-                                           FontSize="13" FontAttributes="Bold"
-                                           TextColor="{DynamicResource PrimaryText}"
-                                           VerticalOptions="Center" />
+                                    <controls:EqualizerView Grid.Column="2" IsVisible="{Binding IsPlaying}"
+                                                            BarColor="{DynamicResource PrimaryText}"
+                                                            VerticalOptions="Center"
+                                                            SemanticProperties.Description="Sonando" />
 
                                     <ImageButton Grid.Column="3"
                                                  Command="{Binding RemoveCommand, Source={RelativeSource AncestorType={x:Type vm:FavoritesViewModel}}, x:DataType=vm:FavoritesViewModel}"

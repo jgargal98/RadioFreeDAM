@@ -54,9 +54,9 @@
                                     <controls:StationLogoView WidthRequest="44" HeightRequest="44" HorizontalOptions="Start"
                                                               FallbackColor="{Binding CardAccent}"
                                                               Source="{Binding FaviconUrl}" Initial="{Binding Initial}" />
-                                    <Label Grid.Column="1" Text="Sonando" IsVisible="{Binding IsPlaying}"
-                                           FontSize="13" FontAttributes="Bold" TextColor="{DynamicResource PrimaryText}"
-                                           HorizontalOptions="End" VerticalOptions="Start" />
+                                    <controls:EqualizerView Grid.Column="1" IsVisible="{Binding IsPlaying}" BarColor="{Binding CardAccent}"
+                                                            HorizontalOptions="End" VerticalOptions="Start" Margin="0,4,2,0"
+                                                            SemanticProperties.Description="Sonando" />
                                 </Grid>
                                 <VerticalStackLayout Grid.Row="1" VerticalOptions="End" Spacing="2">
                                     <Label Text="{Binding Name}" Style="{StaticResource Body1Strong}" MaxLines="1" LineBreakMode="TailTruncation" />
