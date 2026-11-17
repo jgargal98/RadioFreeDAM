@@ -9,7 +9,7 @@
         Colores de acento. Son solo los valores iniciales (verde): AccentService los sustituye al arrancar
         y cada vez que cambia el acento o el tema. Las pantallas los usan con DynamicResource.
     -->
-    <Color x:Key="Primary">#1DB954</Color>          <!-- Relleno: botones, avatares, emisora activa -->
+    <Color x:Key="Primary">#E2765A</Color>          <!-- Relleno: botones, avatares, emisora activa -->
     <Color x:Key="OnPrimary">#0B0B0B</Color>        <!-- Texto encima del relleno -->
     <Color x:Key="PrimaryText">#127A39</Color>      <!-- Acento usado como texto sobre el fondo -->
     <Color x:Key="PrimarySoft">#DDF5E5</Color>      <!-- Fondo suave (emisora seleccionada) -->

@@ -7,7 +7,7 @@ namespace RadioFreeDAM.Services;
 /// </summary>
 public static class AccentPalette
 {
-    public static readonly Color DefaultAccent = Color.FromArgb("#1DB954");
+    public static readonly Color DefaultAccent = Color.FromArgb("#E2765A");
 
     public static readonly Color LightBackground = Color.FromArgb("#F5F5F7");
     public static readonly Color DarkBackground = Color.FromArgb("#121212");

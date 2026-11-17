@@ -7,10 +7,10 @@
     <!-- Cuerpo -->
     <rect x="114" y="190" width="228" height="150" rx="28" fill="#0B0B0B" />
     <!-- Dial -->
-    <rect x="144" y="232" width="64" height="11" rx="5.5" fill="#1DB954" />
-    <rect x="144" y="260" width="64" height="11" rx="5.5" fill="#1DB954" />
-    <rect x="144" y="288" width="64" height="11" rx="5.5" fill="#1DB954" />
+    <rect x="144" y="232" width="64" height="11" rx="5.5" fill="#E2765A" />
+    <rect x="144" y="260" width="64" height="11" rx="5.5" fill="#E2765A" />
+    <rect x="144" y="288" width="64" height="11" rx="5.5" fill="#E2765A" />
     <!-- Altavoz -->
-    <circle cx="278" cy="265" r="44" fill="#1DB954" />
+    <circle cx="278" cy="265" r="44" fill="#E2765A" />
     <circle cx="278" cy="265" r="16" fill="#0B0B0B" />
 </svg>

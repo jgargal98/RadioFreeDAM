@@ -12,7 +12,7 @@ public class AccentService(IPlayerService player, IStationColorService stationCo
 
     public IReadOnlyList<(string Name, Color Color)> Presets { get; } =
     [
-        ("Verde", Color.FromArgb("#1DB954")),
+        ("Coral", Color.FromArgb("#E2765A")),
         ("Azul", Color.FromArgb("#2979FF")),
         ("Violeta", Color.FromArgb("#7C4DFF")),
         ("Rosa", Color.FromArgb("#E91E7A")),
