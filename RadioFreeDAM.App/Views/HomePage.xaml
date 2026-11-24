@@ -21,11 +21,14 @@
     <!-- Everything scrolls together: the header (greeting, search, filters) is the header of the list -->
     <Grid Padding="{StaticResource LayoutPadding}">
       <CollectionView ItemsSource="{Binding Stations}" SelectionMode="None">
-        <!-- Grid of cards: 2 columns on a phone, more on a tablet or a computer -->
+        <!-- Grid of cards: the number of columns follows the width (AdaptiveGridBehavior) -->
         <CollectionView.ItemsLayout>
-            <GridItemsLayout Orientation="Vertical" Span="{OnIdiom Phone=2, Tablet=3, Desktop=4}"
+            <GridItemsLayout Orientation="Vertical" Span="2"
                              HorizontalItemSpacing="12" VerticalItemSpacing="12" />
         </CollectionView.ItemsLayout>
+        <CollectionView.Behaviors>
+            <controls:AdaptiveGridBehavior MinItemWidth="190" />
+        </CollectionView.Behaviors>
 
         <CollectionView.Header>
             <VerticalStackLayout Spacing="12" Padding="0,0,0,12">

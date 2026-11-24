@@ -28,9 +28,12 @@
 
             <CollectionView Grid.Row="3" ItemsSource="{Binding Stations}" SelectionMode="None">
                 <CollectionView.ItemsLayout>
-                    <GridItemsLayout Orientation="Vertical" Span="{OnIdiom Phone=2, Tablet=3, Desktop=4}"
+                    <GridItemsLayout Orientation="Vertical" Span="2"
                                      HorizontalItemSpacing="12" VerticalItemSpacing="12" />
                 </CollectionView.ItemsLayout>
+                <CollectionView.Behaviors>
+                    <controls:AdaptiveGridBehavior MinItemWidth="190" />
+                </CollectionView.Behaviors>
 
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="vm:StationItemViewModel">
