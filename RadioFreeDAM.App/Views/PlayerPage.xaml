@@ -121,6 +121,18 @@
                        Style="{StaticResource ErrorText}" HorizontalTextAlignment="Center" />
             </VerticalStackLayout>
 
+            <!-- Sleep timer: only while the radio is on, or to cancel a running one -->
+            <Button Text="{Binding SleepTimerText}" Command="{Binding ChooseSleepTimerCommand}"
+                    Style="{StaticResource OutlineButton}" HorizontalOptions="Center"
+                    IsVisible="{Binding ShowSleepTimer}"
+                    SemanticProperties.Hint="Apaga la radio pasado un tiempo">
+                <Button.ImageSource>
+                    <FontImageSource Glyph="{x:Static f:FluentUI.timer_24_regular}"
+                                     FontFamily="{x:Static f:FluentUI.FontFamily}"
+                                     Color="{DynamicResource PrimaryText}" Size="20" />
+                </Button.ImageSource>
+            </Button>
+
             <!-- Error de audio: el botón de reproducir sirve para reintentar -->
             <Border Style="{StaticResource CardStyle}" IsVisible="{Binding HasError}">
                 <VerticalStackLayout Spacing="4">

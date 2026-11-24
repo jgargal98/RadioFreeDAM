@@ -13,25 +13,32 @@ public partial class PlayerViewModel : ObservableObject
     private readonly ISessionService _session;
     private readonly IFavoritesService _favorites;
     private readonly IAccentService _accent;
+    private readonly ISleepTimerService _sleepTimer;
+    private readonly IDialogService _dialog;
 
     public PlayerViewModel(
         IPlayerService playerService,
         INavigationService navigationService,
         ISessionService session,
         IFavoritesService favorites,
-        IAccentService accent)
+        IAccentService accent,
+        ISleepTimerService sleepTimer,
+        IDialogService dialog)
     {
         _playerService = playerService;
         _navigationService = navigationService;
         _session = session;
         _favorites = favorites;
         _accent = accent;
+        _sleepTimer = sleepTimer;
+        _dialog = dialog;
 
         _playerService.StateChanged += (_, _) => UpdateFromPlayer();
         // El acento cambia con la emisora, con la elección del usuario y con el tema.
         _accent.AccentChanged += (_, _) => UpdateColors();
         _favorites.FavoritesChanged += (_, _) => UpdateFavorite();
         _session.SessionChanged += (_, _) => UpdateFavorite();
+        _sleepTimer.Changed += (_, _) => OnSleepTimerChanged();
         UpdateFromPlayer();
         UpdateColors();
     }
@@ -132,7 +139,7 @@ public partial class PlayerViewModel : ObservableObject
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsPlaying), nameof(IsLoading), nameof(IsActive), nameof(HasError),
-        nameof(StatusText), nameof(ToggleButtonText))]
+        nameof(StatusText), nameof(ToggleButtonText), nameof(ShowSleepTimer))]
     public partial PlaybackState State { get; set; }
 
     [ObservableProperty]
@@ -164,6 +171,50 @@ public partial class PlayerViewModel : ObservableObject
             _playerService.Stop();
         else
             _playerService.Play();
+    }
+
+    // ---------- Sleep timer ----------
+
+    private const string CancelTimerOption = "Quitar temporizador";
+
+    /// <summary>The button is only useful while the radio is on, or to cancel a timer that is already running.</summary>
+    public bool ShowSleepTimer => IsActive || _sleepTimer.IsActive;
+
+    /// <summary>Text of the timer button: "Temporizador" or the minutes left.</summary>
+    public string SleepTimerText => _sleepTimer.IsActive
+        ? $"Quedan {_sleepTimer.MinutesLeft} min"
+        : "Temporizador";
+
+    public bool IsSleepTimerActive => _sleepTimer.IsActive;
+
+    [RelayCommand]
+    private async Task ChooseSleepTimerAsync()
+    {
+        var options = _sleepTimer.Options.Select(MinutesText).ToList();
+        if (_sleepTimer.IsActive)
+            options.Insert(0, CancelTimerOption);
+
+        var choice = await _dialog.ChooseAsync("Apagar la radio en…", options.ToArray());
+        if (choice is null)
+            return;
+
+        if (choice == CancelTimerOption)
+        {
+            _sleepTimer.Cancel();
+            return;
+        }
+
+        var minutes = _sleepTimer.Options.First(m => MinutesText(m) == choice);
+        _sleepTimer.Start(TimeSpan.FromMinutes(minutes));
+    }
+
+    private static string MinutesText(int minutes) => minutes == 60 ? "1 hora" : $"{minutes} minutos";
+
+    private void OnSleepTimerChanged()
+    {
+        OnPropertyChanged(nameof(ShowSleepTimer));
+        OnPropertyChanged(nameof(SleepTimerText));
+        OnPropertyChanged(nameof(IsSleepTimerActive));
     }
 
     [RelayCommand]

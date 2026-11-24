@@ -81,6 +81,7 @@ namespace RadioFreeDAM
             builder.Services.AddSingleton<IStationColorService, StationColorService>();
             builder.Services.AddSingleton<IAccentService, AccentService>();
             builder.Services.AddSingleton<IDialogService, ShellDialogService>();
+            builder.Services.AddSingleton<ISleepTimerService>(sp => new SleepTimerService(sp.GetRequiredService<IPlayerService>()));
 
             // ViewModels
             builder.Services.AddSingleton<HomeViewModel>();

@@ -56,6 +56,9 @@
 
                 <Button Text="{Binding FavoriteButtonText}" Command="{Binding ToggleFavoriteCommand}"
                         Style="{StaticResource OutlineButton}" HorizontalOptions="Center" />
+                <Button Text="{Binding SleepTimerText}" Command="{Binding ChooseSleepTimerCommand}"
+                        Style="{StaticResource OutlineButton}" HorizontalOptions="Center"
+                        IsVisible="{Binding ShowSleepTimer}" />
                 <Label Text="{Binding FavoriteErrorMessage}" IsVisible="{Binding HasFavoriteError}"
                        Style="{StaticResource ErrorText}" HorizontalTextAlignment="Center" />
             </VerticalStackLayout>
