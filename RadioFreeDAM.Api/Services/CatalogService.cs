@@ -43,7 +43,10 @@ public class CatalogService(IStationService stations)
         return Group(found, isSearch ? int.MaxValue : TopEntries);
     }
 
-    /// <summary>All the stations of a network in the configured country, from the most to the least listened.</summary>
+    /// <summary>
+    /// All the stations of a network in the configured country, from the most to the least listened. The national
+    /// station of the network, when it is known, goes first and is called "COPE (nacional)".
+    /// </summary>
     /// <exception cref="NotFoundAppException">If the network does not exist.</exception>
     public async Task<IReadOnlyList<StationDto>> GetNetworkStationsAsync(string networkId, CancellationToken cancellationToken = default)
     {
@@ -58,12 +61,38 @@ public class CatalogService(IStationService stations)
             found.AddRange(await stations.QueryAsync(query, cancellationToken));
         }
 
-        return found
+        var result = found
             .Where(s => network.Contains(s.Name))
             .DistinctBy(s => s.Id)
             .OrderByDescending(s => s.ClickCount)
             .ToList();
+
+        // The list is sorted by clicks, so the first match is the most listened of the national ones.
+        var national = result.FirstOrDefault(s => network.National?.IsMatch(s.Name.Trim()) == true);
+        if (national is not null)
+        {
+            result.Remove(national);
+            result.Insert(0, Renamed(national, network.NationalName));
+        }
+
+        return result;
     }
+
+    private static StationDto Renamed(StationDto station, string name) => new()
+    {
+        Id = station.Id,
+        Name = name,
+        StreamUrl = station.StreamUrl,
+        FaviconUrl = station.FaviconUrl,
+        Country = station.Country,
+        Tags = station.Tags,
+        Codec = station.Codec,
+        Bitrate = station.Bitrate,
+        ClickCount = station.ClickCount,
+        Votes = station.Votes,
+        ClickTrend = station.ClickTrend,
+        NetworkId = station.NetworkId
+    };
 
     private static void Validate(CatalogRequest request)
     {

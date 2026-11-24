@@ -87,6 +87,34 @@ public class CatalogServiceTests
     }
 
     [Fact]
+    public async Task LaEmisoraNacionalVaLaPrimera_YSeLlamaConElNombreDeLaCadena()
+    {
+        var catalog = new FakeStationService(
+            Station("a", "COPE + Sevilla", clicks: 264),
+            Station("b", "Cope Madrid FM", clicks: 157),
+            Station("c", "COPE Málaga", clicks: 54));
+
+        var stations = await new CatalogService(catalog).GetNetworkStationsAsync("cope");
+
+        Assert.Equal(["b", "a", "c"], stations.Select(s => s.Id));
+        Assert.Equal("COPE (nacional)", stations[0].Name);
+        Assert.Equal("COPE + Sevilla", stations[1].Name); // the rest keep their own name
+    }
+
+    [Fact]
+    public async Task SinEmisoraNacionalConocida_ElOrdenYLosNombresNoCambian()
+    {
+        var catalog = new FakeStationService(
+            Station("a", "COPE Málaga", clicks: 10),
+            Station("b", "COPE + Sevilla", clicks: 50));
+
+        var stations = await new CatalogService(catalog).GetNetworkStationsAsync("cope");
+
+        Assert.Equal(["b", "a"], stations.Select(s => s.Id));
+        Assert.Equal("COPE + Sevilla", stations[0].Name);
+    }
+
+    [Fact]
     public async Task CadenaQueNoExiste_Da404()
     {
         await Assert.ThrowsAsync<NotFoundAppException>(
