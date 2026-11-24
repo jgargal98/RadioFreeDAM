@@ -37,6 +37,10 @@ public class BackHeaderView : ContentView
         // Volver es solo navegación de la interfaz: no necesita pasar por el ViewModel.
         back.Clicked += async (_, _) => await Shell.Current.GoToAsync("..");
 
+        // Windows already shows its own back arrow in the title bar, so a second one would be redundant.
+        var showBack = DeviceInfo.Platform != DevicePlatform.WinUI;
+        back.IsVisible = showBack;
+
         _title = new Label { VerticalOptions = LayoutOptions.Center };
         _title.SetDynamicResource(StyleProperty, "Title1");
 
@@ -44,7 +48,7 @@ public class BackHeaderView : ContentView
         {
             ColumnDefinitions = [new ColumnDefinition(GridLength.Auto), new ColumnDefinition(GridLength.Star)],
             ColumnSpacing = 4,
-            Margin = new Thickness(-10, 0, 0, 0), // alinea la flecha con el margen del contenido
+            Margin = new Thickness(showBack ? -10 : 0, 0, 0, 0), // aligns the arrow with the content margin
             Children = { back, _title }
         };
         Grid.SetColumn(_title, 1);
